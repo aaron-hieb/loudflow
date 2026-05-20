@@ -5,10 +5,10 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/AuthContext";
 
 const navItems = [
-  { path: "/", label: "Dashboard", icon: LayoutDashboard },
-  { path: "/events", label: "Events", icon: FolderOpen },
-  { path: "/contacts", label: "Contacts", icon: Users },
-];
+{ path: "/", label: "Dashboard", icon: LayoutDashboard },
+{ path: "/events", label: "Events", icon: FolderOpen },
+{ path: "/contacts", label: "Contacts", icon: Users }];
+
 
 export default function Layout() {
   const location = useLocation();
@@ -24,29 +24,29 @@ export default function Layout() {
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
               <Zap className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg tracking-tight">Prodflow</span>
+            <span className="font-bold text-lg tracking-tight"></span>
           </Link>
         </div>
         <nav className="flex-1 p-4 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = location.pathname === item.path || 
-              (item.path !== "/" && location.pathname.startsWith(item.path));
+            const isActive = location.pathname === item.path ||
+            item.path !== "/" && location.pathname.startsWith(item.path);
             return (
               <Link
                 key={item.path}
                 to={item.path}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
-                  isActive
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                )}
-              >
+                  isActive ?
+                  "bg-primary text-primary-foreground shadow-sm" :
+                  "text-muted-foreground hover:text-foreground hover:bg-muted"
+                )}>
+                
                 <Icon className="h-4 w-4" />
                 {item.label}
-              </Link>
-            );
+              </Link>);
+
           })}
         </nav>
         <div className="p-4 border-t border-border">
@@ -78,32 +78,32 @@ export default function Layout() {
       </div>
 
       {/* Mobile Nav Overlay */}
-      {mobileOpen && (
-        <div className="md:hidden fixed inset-0 z-40 bg-black/50" onClick={() => setMobileOpen(false)}>
+      {mobileOpen &&
+      <div className="md:hidden fixed inset-0 z-40 bg-black/50" onClick={() => setMobileOpen(false)}>
           <div className="w-64 bg-card h-full p-4 pt-16 space-y-1" onClick={(e) => e.stopPropagation()}>
             {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setMobileOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  )}
-                >
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={() => setMobileOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
+                  isActive ?
+                  "bg-primary text-primary-foreground" :
+                  "text-muted-foreground hover:text-foreground hover:bg-muted"
+                )}>
+                
                   <Icon className="h-4 w-4" />
                   {item.label}
-                </Link>
-              );
-            })}
+                </Link>);
+
+          })}
           </div>
         </div>
-      )}
+      }
 
       {/* Main Content */}
       <main className="flex-1 md:ml-64 pt-14 md:pt-0">
@@ -111,6 +111,6 @@ export default function Layout() {
           <Outlet />
         </div>
       </main>
-    </div>
-  );
+    </div>);
+
 }
