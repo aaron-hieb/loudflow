@@ -1,0 +1,53 @@
+{
+  "name": "Flight",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "title": "Event ID"
+    },
+    "passenger": {
+      "type": "string",
+      "title": "Passenger"
+    },
+    "airline": {
+      "type": "string",
+      "title": "Airline"
+    },
+    "flight_number": {
+      "type": "string",
+      "title": "Flight Number"
+    },
+    "departure_city": {
+      "type": "string",
+      "title": "Departure City"
+    },
+    "arrival_city": {
+      "type": "string",
+      "title": "Arrival City"
+    },
+    "departure_date": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Departure Date/Time"
+    },
+    "arrival_date": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Arrival Date/Time"
+    },
+    "confirmation_code": {
+      "type": "string",
+      "title": "Confirmation Code"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "event_id",
+    "passenger",
+    "departure_date"
+  ]
+}

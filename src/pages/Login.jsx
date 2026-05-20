@@ -1,125 +1,63 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { LogIn, Mail, Lock, Loader2 } from "lucide-react";
-import AuthLayout from "@/components/AuthLayout";
-import GoogleIcon from "@/components/GoogleIcon";
+import { useState } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Link } from 'react-router-dom';
+import { Zap } from 'lucide-react';
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
-    setError("");
     setLoading(true);
+    setError('');
     try {
       await base44.auth.loginViaEmailPassword(email, password);
-      window.location.href = "/";
+      window.location.href = '/';
     } catch (err) {
-      setError(err.message || "Invalid email or password");
+      setError(err.message || 'Login failed');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleGoogle = () => {
-    base44.auth.loginWithProvider("google", "/");
-  };
+  }
 
   return (
-    <AuthLayout
-      icon={LogIn}
-      title="Welcome back"
-      subtitle="Log in to your account"
-      footer={
-        <>
-          Don't have an account?{" "}
-          <Link to="/register" className="text-primary font-medium hover:underline">
-            Create one
-          </Link>
-        </>
-      }
-    >
-      <Button
-        variant="outline"
-        className="w-full h-12 text-sm font-medium mb-6"
-        onClick={handleGoogle}
-      >
-        <GoogleIcon className="w-5 h-5 mr-2" />
-        Continue with Google
-      </Button>
-
-      <div className="relative mb-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border" />
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="w-full max-w-sm space-y-8">
+        <div className="text-center">
+          <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center mx-auto mb-4">
+            <Zap className="h-6 w-6 text-primary-foreground" />
+          </div>
+          <h1 className="text-2xl font-bold">Welcome back</h1>
+          <p className="text-muted-foreground text-sm mt-1">Sign in to Prodflow</p>
         </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-card px-3 text-muted-foreground">or</span>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {error && <p className="text-sm text-destructive text-center">{error}</p>}
+          <div>
+            <Label>Email</Label>
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          </div>
+          <div>
+            <Label>Password</Label>
+            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          </div>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? 'Signing in...' : 'Sign In'}
+          </Button>
+          <Button type="button" variant="outline" className="w-full" onClick={() => base44.auth.loginWithProvider('google', '/')}>
+            Continue with Google
+          </Button>
+        </form>
+        <div className="text-center text-sm text-muted-foreground space-y-1">
+          <Link to="/forgot-password" className="hover:text-foreground transition-colors">Forgot password?</Link>
+          <p>Don't have an account? <Link to="/register" className="text-primary hover:underline">Sign up</Link></p>
         </div>
       </div>
-
-      {error && (
-        <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              autoFocus
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="pl-10 h-12"
-              required
-            />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="password">Password</Label>
-            <Link to="/forgot-password" className="text-xs text-primary hover:underline">
-              Forgot password?
-            </Link>
-          </div>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="pl-10 h-12"
-              required
-            />
-          </div>
-        </div>
-        <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Logging in...
-            </>
-          ) : (
-            "Log in"
-          )}
-        </Button>
-      </form>
-    </AuthLayout>
+    </div>
   );
 }

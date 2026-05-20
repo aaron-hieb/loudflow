@@ -1,0 +1,46 @@
+{
+  "name": "Contact",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Name"
+    },
+    "role": {
+      "type": "string",
+      "title": "Role"
+    },
+    "company": {
+      "type": "string",
+      "title": "Company"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "title": "Email"
+    },
+    "phone": {
+      "type": "string",
+      "title": "Phone"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "crew",
+        "vendor",
+        "client",
+        "venue",
+        "talent",
+        "other"
+      ],
+      "title": "Category"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

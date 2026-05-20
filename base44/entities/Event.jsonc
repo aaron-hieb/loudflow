@@ -1,0 +1,56 @@
+{
+  "name": "Event",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Event Name"
+    },
+    "client": {
+      "type": "string",
+      "title": "Client"
+    },
+    "venue": {
+      "type": "string",
+      "title": "Venue"
+    },
+    "city": {
+      "type": "string",
+      "title": "City"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Start Date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "title": "End Date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planning",
+        "confirmed",
+        "in_progress",
+        "completed",
+        "cancelled"
+      ],
+      "title": "Status"
+    },
+    "budget": {
+      "type": "number",
+      "title": "Budget"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "name",
+    "start_date",
+    "status"
+  ]
+}

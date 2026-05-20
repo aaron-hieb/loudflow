@@ -1,0 +1,53 @@
+{
+  "name": "Hotel",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "title": "Event ID"
+    },
+    "guest_name": {
+      "type": "string",
+      "title": "Guest Name"
+    },
+    "hotel_name": {
+      "type": "string",
+      "title": "Hotel Name"
+    },
+    "address": {
+      "type": "string",
+      "title": "Address"
+    },
+    "check_in": {
+      "type": "string",
+      "format": "date",
+      "title": "Check-In"
+    },
+    "check_out": {
+      "type": "string",
+      "format": "date",
+      "title": "Check-Out"
+    },
+    "room_type": {
+      "type": "string",
+      "title": "Room Type"
+    },
+    "confirmation_number": {
+      "type": "string",
+      "title": "Confirmation Number"
+    },
+    "nightly_rate": {
+      "type": "number",
+      "title": "Nightly Rate"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "event_id",
+    "guest_name",
+    "hotel_name"
+  ]
+}

@@ -1,76 +1,47 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Mail, ArrowLeft, Loader2 } from "lucide-react";
-import AuthLayout from "@/components/AuthLayout";
+import { useState } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Link } from 'react-router-dom';
+import { Zap } from 'lucide-react';
 
 export default function ForgotPassword() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
-  const handleSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
-    try {
-      await base44.auth.resetPasswordRequest(email);
-    } catch {
-      // Always show success regardless
-    } finally {
-      setLoading(false);
-      setSent(true);
-    }
-  };
+    try { await base44.auth.resetPasswordRequest(email); } catch {}
+    setSent(true);
+    setLoading(false);
+  }
 
   return (
-    <AuthLayout
-      icon={Mail}
-      title="Reset password"
-      subtitle="We'll send you a link to reset it"
-      footer={
-        <Link to="/login" className="text-primary font-medium hover:underline">
-          <ArrowLeft className="w-3 h-3 inline mr-1" />Back to log in
-        </Link>
-      }
-    >
-      {sent ? (
-        <p className="text-sm text-foreground text-center">
-          If an account exists with that email, you'll receive a password reset link shortly.
-        </p>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email address</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                autoFocus
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-10 h-12"
-                required
-              />
-            </div>
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="w-full max-w-sm space-y-8">
+        <div className="text-center">
+          <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center mx-auto mb-4">
+            <Zap className="h-6 w-6 text-primary-foreground" />
           </div>
-          <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Sending...
-              </>
-            ) : (
-              "Send reset link"
-            )}
-          </Button>
-        </form>
-      )}
-    </AuthLayout>
+          <h1 className="text-2xl font-bold">Reset password</h1>
+          <p className="text-muted-foreground text-sm mt-1">We'll send you a reset link</p>
+        </div>
+        {sent ? (
+          <div className="text-center space-y-4">
+            <p className="text-sm text-muted-foreground">If an account exists for {email}, you'll receive a reset link shortly.</p>
+            <Link to="/login"><Button variant="outline" className="w-full">Back to Sign In</Button></Link>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
+            <Button type="submit" className="w-full" disabled={loading}>{loading ? 'Sending...' : 'Send Reset Link'}</Button>
+            <p className="text-center text-sm"><Link to="/login" className="text-muted-foreground hover:text-foreground">Back to Sign In</Link></p>
+          </form>
+        )}
+      </div>
+    </div>
   );
 }

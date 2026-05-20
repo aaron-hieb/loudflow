@@ -1,0 +1,58 @@
+{
+  "name": "GearItem",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "title": "Event ID"
+    },
+    "name": {
+      "type": "string",
+      "title": "Item Name"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "audio",
+        "lighting",
+        "video",
+        "staging",
+        "power",
+        "rigging",
+        "backline",
+        "other"
+      ],
+      "title": "Category"
+    },
+    "quantity": {
+      "type": "number",
+      "title": "Quantity"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "needed",
+        "reserved",
+        "packed",
+        "shipped",
+        "on_site",
+        "returned"
+      ],
+      "title": "Status"
+    },
+    "assigned_to": {
+      "type": "string",
+      "title": "Assigned To"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "event_id",
+    "name",
+    "category",
+    "quantity"
+  ]
+}
