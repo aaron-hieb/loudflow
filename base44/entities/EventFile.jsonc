@@ -1,0 +1,40 @@
+{
+  "name": "EventFile",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "title": "Event ID"
+    },
+    "name": {
+      "type": "string",
+      "title": "File Name"
+    },
+    "file_url": {
+      "type": "string",
+      "title": "File URL"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "contract",
+        "rider",
+        "stage_plot",
+        "schedule",
+        "invoice",
+        "permit",
+        "other"
+      ],
+      "title": "Category"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "event_id",
+    "name",
+    "file_url"
+  ]
+}
