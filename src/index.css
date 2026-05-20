@@ -10,12 +10,12 @@
     --font-mono: 'JetBrains Mono', monospace;
 
     --background: 220 0% 22%;
-    --foreground: 222 0% 100%;
+    --foreground: 222 0% 77%;
     --card: 0 0% 0%;
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 62%;
     --popover-foreground: 222 47% 11%;
-    --primary: 360 100% 26%;
+    --primary: 22 100% 50%;
     --primary-foreground: 0 0% 100%;
     --secondary: 220 14% 96%;
     --secondary-foreground: 222 47% 11%;
@@ -25,7 +25,7 @@
     --accent-foreground: 25 95% 30%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 220 13% 91%;
+    --border: 220 0% 28%;
     --input: 220 13% 91%;
     --ring: 25 95% 53%;
     --chart-1: 25 95% 53%;
