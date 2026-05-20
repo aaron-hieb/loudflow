@@ -20,6 +20,7 @@ import HotelTab from "../components/event/HotelTab";
 import GearTab from "../components/event/GearTab";
 import EventContactsTab from "../components/event/EventContactsTab";
 import FilesTab from "../components/event/FilesTab";
+import CrewTab from "../components/event/CrewTab";
 import moment from "moment";
 
 export default function EventDetail() {
@@ -31,6 +32,7 @@ export default function EventDetail() {
   const [hotels, setHotels] = useState([]);
   const [gearItems, setGearItems] = useState([]);
   const [eventFiles, setEventFiles] = useState([]);
+  const [crew, setCrew] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showEdit, setShowEdit] = useState(false);
   const [editForm, setEditForm] = useState({});
@@ -41,13 +43,14 @@ export default function EventDetail() {
   }, [eventId]);
 
   async function loadAll() {
-    const [evt, schedule, fl, ht, gear, files] = await Promise.all([
+    const [evt, schedule, fl, ht, gear, files, crewList] = await Promise.all([
       base44.entities.Event.get(eventId),
       base44.entities.ScheduleItem.filter({ event_id: eventId }),
       base44.entities.Flight.filter({ event_id: eventId }),
       base44.entities.Hotel.filter({ event_id: eventId }),
       base44.entities.GearItem.filter({ event_id: eventId }),
       base44.entities.EventFile.filter({ event_id: eventId }),
+      base44.entities.CrewMember.filter({ event_id: eventId }),
     ]);
     setEvent(evt);
     setScheduleItems(schedule);
@@ -55,6 +58,7 @@ export default function EventDetail() {
     setHotels(ht);
     setGearItems(gear);
     setEventFiles(files);
+    setCrew(crewList);
     setEditForm({
       name: evt.name || "", client: evt.client || "", venue: evt.venue || "",
       city: evt.city || "", start_date: evt.start_date || "", end_date: evt.end_date || "",
@@ -161,6 +165,7 @@ export default function EventDetail() {
           <TabsTrigger value="hotels">Hotels</TabsTrigger>
           <TabsTrigger value="gear">Gear</TabsTrigger>
           <TabsTrigger value="contacts">Contacts</TabsTrigger>
+          <TabsTrigger value="crew">Crew</TabsTrigger>
           <TabsTrigger value="files">Files</TabsTrigger>
         </TabsList>
         <TabsContent value="schedule" className="mt-6">
@@ -177,6 +182,9 @@ export default function EventDetail() {
         </TabsContent>
         <TabsContent value="contacts" className="mt-6">
           <EventContactsTab eventId={eventId} />
+        </TabsContent>
+        <TabsContent value="crew" className="mt-6">
+          <CrewTab eventId={eventId} crew={crew} onRefresh={loadAll} />
         </TabsContent>
         <TabsContent value="files" className="mt-6">
           <FilesTab eventId={eventId} files={eventFiles} onRefresh={loadAll} />

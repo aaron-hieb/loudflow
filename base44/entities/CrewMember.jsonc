@@ -1,0 +1,61 @@
+{
+  "name": "CrewMember",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "title": "Event ID"
+    },
+    "name": {
+      "type": "string",
+      "title": "Name"
+    },
+    "role": {
+      "type": "string",
+      "title": "Role"
+    },
+    "department": {
+      "type": "string",
+      "enum": [
+        "audio",
+        "lighting",
+        "video",
+        "staging",
+        "rigging",
+        "production",
+        "logistics",
+        "security",
+        "catering",
+        "other"
+      ],
+      "title": "Department"
+    },
+    "phone": {
+      "type": "string",
+      "title": "Phone"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "title": "Email"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "confirmed",
+        "pending",
+        "cancelled"
+      ],
+      "title": "Status"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "event_id",
+    "name",
+    "role"
+  ]
+}
