@@ -1,27 +1,24 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
-import { Plus, CalendarDays, Plane, BedDouble, Package, Users } from "lucide-react";
+import { Plus, CalendarDays, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import EventCard from "../components/EventCard";
 import moment from "moment";
 
 export default function Dashboard() {
   const [events, setEvents] = useState([]);
-  const [stats, setStats] = useState({ flights: 0, hotels: 0, gear: 0, contacts: 0 });
+  const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
-      const [evts, flights, hotels, gear, contacts] = await Promise.all([
+      const [evts, ctcts] = await Promise.all([
         base44.entities.Event.list("-start_date", 50),
-        base44.entities.Flight.list("-created_date", 100),
-        base44.entities.Hotel.list("-created_date", 100),
-        base44.entities.GearItem.list("-created_date", 100),
         base44.entities.Contact.list("-created_date", 100),
       ]);
       setEvents(evts);
-      setStats({ flights: flights.length, hotels: hotels.length, gear: gear.length, contacts: contacts.length });
+      setContacts(ctcts);
       setLoading(false);
     }
     load();
@@ -34,9 +31,9 @@ export default function Dashboard() {
 
   const statCards = [
     { label: "Active Events", value: events.filter(e => e.status !== "completed" && e.status !== "cancelled").length, icon: CalendarDays, color: "text-primary" },
-    { label: "Flights", value: stats.flights, icon: Plane, color: "text-blue-500" },
-    { label: "Hotels", value: stats.hotels, icon: BedDouble, color: "text-emerald-500" },
-    { label: "Gear Items", value: stats.gear, icon: Package, color: "text-violet-500" },
+    { label: "Total Events", value: events.length, icon: CalendarDays, color: "text-blue-500" },
+    { label: "Contacts", value: contacts.length, icon: Users, color: "text-emerald-500" },
+    { label: "Completed", value: events.filter(e => e.status === "completed").length, icon: CalendarDays, color: "text-slate-400" },
   ];
 
   if (loading) {
