@@ -30,40 +30,41 @@ export default function CrewTab({ eventId, crew, onRefresh }) {
   const [saving, setSaving] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [profiles, setProfiles] = useState([]);
+  const [contacts, setContacts] = useState([]);
 
   useEffect(() => {
     if (showImport) loadProfiles();
   }, [showImport]);
 
   async function loadProfiles() {
-    const all = await base44.entities.CrewMember.list("-created_date", 200);
-    // Deduplicate by name+email from other events, keeping latest
+    const [all, allContacts] = await Promise.all([
+      base44.entities.CrewMember.list("-created_date", 200),
+      base44.entities.Contact.list("-created_date", 200),
+    ]);
     const seen = new Set();
     const unique = [];
     for (const m of all) {
       if (m.event_id === eventId) continue;
       const key = (m.name + "|").toLowerCase() + (m.email || "").toLowerCase();
-      if (!seen.has(key)) {
-        seen.add(key);
-        unique.push(m);
-      }
+      if (!seen.has(key)) { seen.add(key); unique.push(m); }
     }
     setProfiles(unique);
+    setContacts(allContacts);
   }
 
-  async function importProfile(profile) {
-    await base44.entities.CrewMember.create({
-      event_id: eventId,
-      name: profile.name,
-      role: profile.role,
-      department: profile.department,
-      phone: profile.phone,
-      email: profile.email,
+  function openImportForm(source) {
+    setForm({
+      name: source.name || "",
+      role: source.role || "",
+      department: source.department || "other",
+      phone: source.phone || "",
+      email: source.email || "",
       status: "confirmed",
-      notes: profile.notes,
+      notes: source.notes || "",
     });
+    setEditId(null);
     setShowImport(false);
-    onRefresh();
+    setShowForm(true);
   }
 
   async function handleSave() {
@@ -176,33 +177,58 @@ export default function CrewTab({ eventId, crew, onRefresh }) {
 
       {/* Import Picker Dialog */}
       <Dialog open={showImport} onOpenChange={setShowImport}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Import Crew Profile</DialogTitle></DialogHeader>
-          {profiles.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-4 text-center">No crew profiles found from other events.</p>
-          ) : (
-            <div className="space-y-2 mt-2 max-h-80 overflow-y-auto">
-              {profiles.map((p) => (
-                <button key={p.id} onClick={() => importProfile(p)}
-                  className="w-full text-left bg-muted/50 hover:bg-muted rounded-lg p-3 flex items-center gap-3 transition-colors">
-                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary shrink-0">
-                    {p.name?.[0] || "?"}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium">{p.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">{p.role}{p.department ? ` · ${deptLabels[p.department] || p.department}` : ""}</p>
-                    {(p.email || p.phone) && (
-                      <p className="text-xs text-muted-foreground truncate">{p.email || p.phone}</p>
-                    )}
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Import Crew Member</DialogTitle></DialogHeader>
+          <p className="text-xs text-muted-foreground -mt-1">Select a profile to pre-fill — you can adjust the role before saving.</p>
+          <div className="max-h-96 overflow-y-auto space-y-4 mt-1">
+            {contacts.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">From Contacts</p>
+                <div className="space-y-1">
+                  {contacts.map((c) => (
+                    <button key={c.id} onClick={() => openImportForm(c)}
+                      className="w-full text-left bg-muted/50 hover:bg-muted rounded-lg p-3 flex items-center gap-3 transition-colors">
+                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary shrink-0">
+                        {c.name?.[0] || "?"}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium">{c.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">{c.role || c.category}{c.company ? ` @ ${c.company}` : ""}</p>
+                        {(c.email || c.phone) && <p className="text-xs text-muted-foreground truncate">{c.email || c.phone}</p>}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {profiles.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">From Previous Events</p>
+                <div className="space-y-1">
+                  {profiles.map((p) => (
+                    <button key={p.id} onClick={() => openImportForm(p)}
+                      className="w-full text-left bg-muted/50 hover:bg-muted rounded-lg p-3 flex items-center gap-3 transition-colors">
+                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary shrink-0">
+                        {p.name?.[0] || "?"}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium">{p.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">{p.role}{p.department ? ` · ${deptLabels[p.department] || p.department}` : ""}</p>
+                        {(p.email || p.phone) && <p className="text-xs text-muted-foreground truncate">{p.email || p.phone}</p>}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {contacts.length === 0 && profiles.length === 0 && (
+              <p className="text-sm text-muted-foreground py-4 text-center">No profiles found.</p>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showForm} onOpenChange={setShowForm}>
+      <Dialog open={showForm} onOpenChange={(o) => { if (!o) { setShowForm(false); setEditId(null); setForm(emptyForm); } }}>
         <DialogContent>
           <DialogHeader><DialogTitle>{editId ? "Edit Crew Member" : "Add Crew Member"}</DialogTitle></DialogHeader>
           <div className="space-y-3 mt-2">
