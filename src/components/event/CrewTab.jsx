@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Users, Trash2, Mail, Phone, Pencil } from "lucide-react";
+import { Plus, Users, Trash2, Mail, Phone, Pencil, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +28,43 @@ export default function CrewTab({ eventId, crew, onRefresh }) {
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [showImport, setShowImport] = useState(false);
+  const [profiles, setProfiles] = useState([]);
+
+  useEffect(() => {
+    if (showImport) loadProfiles();
+  }, [showImport]);
+
+  async function loadProfiles() {
+    const all = await base44.entities.CrewMember.list("-created_date", 200);
+    // Deduplicate by name+email from other events, keeping latest
+    const seen = new Set();
+    const unique = [];
+    for (const m of all) {
+      if (m.event_id === eventId) continue;
+      const key = (m.name + "|").toLowerCase() + (m.email || "").toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        unique.push(m);
+      }
+    }
+    setProfiles(unique);
+  }
+
+  async function importProfile(profile) {
+    await base44.entities.CrewMember.create({
+      event_id: eventId,
+      name: profile.name,
+      role: profile.role,
+      department: profile.department,
+      phone: profile.phone,
+      email: profile.email,
+      status: "confirmed",
+      notes: profile.notes,
+    });
+    setShowImport(false);
+    onRefresh();
+  }
 
   async function handleSave() {
     setSaving(true);
@@ -68,11 +105,16 @@ export default function CrewTab({ eventId, crew, onRefresh }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center gap-2">
         <h3 className="font-semibold">Crew List <span className="text-muted-foreground font-normal text-sm">({crew.length})</span></h3>
-        <Button size="sm" onClick={() => { setForm(emptyForm); setEditId(null); setShowForm(true); }} className="gap-1.5">
-          <Plus className="h-3.5 w-3.5" /> Add Crew
-        </Button>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={() => setShowImport(true)} className="gap-1.5">
+            <Download className="h-3.5 w-3.5" /> Import
+          </Button>
+          <Button size="sm" onClick={() => { setForm(emptyForm); setEditId(null); setShowForm(true); }} className="gap-1.5">
+            <Plus className="h-3.5 w-3.5" /> Add Crew
+          </Button>
+        </div>
       </div>
 
       {crew.length === 0 ? (
@@ -131,6 +173,34 @@ export default function CrewTab({ eventId, crew, onRefresh }) {
           ))}
         </div>
       )}
+
+      {/* Import Picker Dialog */}
+      <Dialog open={showImport} onOpenChange={setShowImport}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Import Crew Profile</DialogTitle></DialogHeader>
+          {profiles.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4 text-center">No crew profiles found from other events.</p>
+          ) : (
+            <div className="space-y-2 mt-2 max-h-80 overflow-y-auto">
+              {profiles.map((p) => (
+                <button key={p.id} onClick={() => importProfile(p)}
+                  className="w-full text-left bg-muted/50 hover:bg-muted rounded-lg p-3 flex items-center gap-3 transition-colors">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary shrink-0">
+                    {p.name?.[0] || "?"}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">{p.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{p.role}{p.department ? ` · ${deptLabels[p.department] || p.department}` : ""}</p>
+                    {(p.email || p.phone) && (
+                      <p className="text-xs text-muted-foreground truncate">{p.email || p.phone}</p>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent>
