@@ -37,18 +37,7 @@ export default function CrewTab({ eventId, crew, onRefresh }) {
   }, [showImport]);
 
   async function loadProfiles() {
-    const [all, allContacts] = await Promise.all([
-      base44.entities.CrewMember.list("-created_date", 200),
-      base44.entities.Contact.list("-created_date", 200),
-    ]);
-    const seen = new Set();
-    const unique = [];
-    for (const m of all) {
-      if (m.event_id === eventId) continue;
-      const key = (m.name + "|").toLowerCase() + (m.email || "").toLowerCase();
-      if (!seen.has(key)) { seen.add(key); unique.push(m); }
-    }
-    setProfiles(unique);
+    const allContacts = await base44.entities.Contact.filter({ category: "crew" }, "-created_date", 200);
     setContacts(allContacts);
   }
 
@@ -179,51 +168,23 @@ export default function CrewTab({ eventId, crew, onRefresh }) {
       <Dialog open={showImport} onOpenChange={setShowImport}>
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>Import Crew Member</DialogTitle></DialogHeader>
-          <p className="text-xs text-muted-foreground -mt-1">Select a profile to pre-fill — you can adjust the role before saving.</p>
-          <div className="max-h-96 overflow-y-auto space-y-4 mt-1">
-            {contacts.length > 0 && (
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">From Contacts</p>
-                <div className="space-y-1">
-                  {contacts.map((c) => (
-                    <button key={c.id} onClick={() => openImportForm(c)}
-                      className="w-full text-left bg-muted/50 hover:bg-muted rounded-lg p-3 flex items-center gap-3 transition-colors">
-                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary shrink-0">
-                        {c.name?.[0] || "?"}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium">{c.name}</p>
-                        <p className="text-xs text-muted-foreground truncate">{c.role || c.category}{c.company ? ` @ ${c.company}` : ""}</p>
-                        {(c.email || c.phone) && <p className="text-xs text-muted-foreground truncate">{c.email || c.phone}</p>}
-                      </div>
-                    </button>
-                  ))}
+          <p className="text-xs text-muted-foreground -mt-1">Select a contact to pre-fill — you can adjust the role before saving.</p>
+          <div className="max-h-96 overflow-y-auto space-y-1 mt-1">
+            {contacts.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">No crew contacts found. Add contacts with the "crew" category first.</p>
+            ) : contacts.map((c) => (
+              <button key={c.id} onClick={() => openImportForm(c)}
+                className="w-full text-left bg-muted/50 hover:bg-muted rounded-lg p-3 flex items-center gap-3 transition-colors">
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary shrink-0">
+                  {c.name?.[0] || "?"}
                 </div>
-              </div>
-            )}
-            {profiles.length > 0 && (
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">From Previous Events</p>
-                <div className="space-y-1">
-                  {profiles.map((p) => (
-                    <button key={p.id} onClick={() => openImportForm(p)}
-                      className="w-full text-left bg-muted/50 hover:bg-muted rounded-lg p-3 flex items-center gap-3 transition-colors">
-                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary shrink-0">
-                        {p.name?.[0] || "?"}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium">{p.name}</p>
-                        <p className="text-xs text-muted-foreground truncate">{p.role}{p.department ? ` · ${deptLabels[p.department] || p.department}` : ""}</p>
-                        {(p.email || p.phone) && <p className="text-xs text-muted-foreground truncate">{p.email || p.phone}</p>}
-                      </div>
-                    </button>
-                  ))}
+                <div className="min-w-0">
+                  <p className="text-sm font-medium">{c.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">{c.role}{c.company ? ` @ ${c.company}` : ""}</p>
+                  {(c.email || c.phone) && <p className="text-xs text-muted-foreground truncate">{c.email || c.phone}</p>}
                 </div>
-              </div>
-            )}
-            {contacts.length === 0 && profiles.length === 0 && (
-              <p className="text-sm text-muted-foreground py-4 text-center">No profiles found.</p>
-            )}
+              </button>
+            ))}
           </div>
         </DialogContent>
       </Dialog>
