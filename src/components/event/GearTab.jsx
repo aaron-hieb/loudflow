@@ -17,6 +17,7 @@ export default function GearTab({ eventId, items, onRefresh }) {
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ name: "", category: "audio", quantity: 1, status: "needed", assigned_to: "", notes: "" });
   const [saving, setSaving] = useState(false);
+  const [selected, setSelected] = useState(null);
 
   async function handleAdd() {
     setSaving(true);
@@ -65,7 +66,7 @@ export default function GearTab({ eventId, items, onRefresh }) {
               <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wider">{categoryLabels[cat] || cat}</h4>
               <div className="space-y-2">
                 {catItems.map((item) => (
-                  <div key={item.id} className="bg-card border border-border rounded-lg p-4 flex items-center justify-between group">
+                  <div key={item.id} onClick={() => setSelected(item)} className="bg-card border border-border rounded-lg p-4 flex items-center justify-between group cursor-pointer hover:bg-muted/30 transition-colors">
                     <div className="flex items-center gap-4">
                       <span className="text-sm font-mono text-muted-foreground w-8">{item.quantity}x</span>
                       <div>
@@ -87,7 +88,7 @@ export default function GearTab({ eventId, items, onRefresh }) {
                           <SelectItem value="returned">Returned</SelectItem>
                         </SelectContent>
                       </Select>
-                      <button onClick={() => handleDelete(item.id)} className="opacity-0 group-hover:opacity-100 p-1 hover:text-destructive transition-all">
+                      <button onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }} className="opacity-0 group-hover:opacity-100 p-1 hover:text-destructive transition-all">
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
@@ -98,6 +99,28 @@ export default function GearTab({ eventId, items, onRefresh }) {
           ))}
         </div>
       )}
+
+      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <DialogContent>
+          {selected && (
+            <>
+              <DialogHeader><DialogTitle>{selected.name}</DialogTitle></DialogHeader>
+              <div className="space-y-2 mt-2 text-sm">
+                <div><span className="text-muted-foreground">Category: </span>{categoryLabels[selected.category] || selected.category}</div>
+                <div><span className="text-muted-foreground">Quantity: </span>{selected.quantity}</div>
+                <div><span className="text-muted-foreground">Status: </span>{selected.status?.replace("_", " ")}</div>
+                {selected.assigned_to && <div><span className="text-muted-foreground">Assigned to: </span>{selected.assigned_to}</div>}
+                {selected.notes && (
+                  <div className="pt-2 border-t border-border">
+                    <p className="text-xs text-muted-foreground mb-1 font-medium uppercase tracking-wider">Notes</p>
+                    <p className="whitespace-pre-wrap">{selected.notes}</p>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
         <DialogContent>

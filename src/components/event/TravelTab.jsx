@@ -12,6 +12,7 @@ export default function TravelTab({ eventId, flights, onRefresh }) {
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ passenger: "", airline: "", flight_number: "", departure_city: "", arrival_city: "", departure_date: "", arrival_date: "", confirmation_code: "", notes: "" });
   const [saving, setSaving] = useState(false);
+  const [selected, setSelected] = useState(null);
 
   async function handleAdd() {
     setSaving(true);
@@ -44,7 +45,7 @@ export default function TravelTab({ eventId, flights, onRefresh }) {
       ) : (
         <div className="space-y-3">
           {flights.map((f) => (
-            <div key={f.id} className="bg-card border border-border rounded-lg p-4 group">
+            <div key={f.id} onClick={() => setSelected(f)} className="bg-card border border-border rounded-lg p-4 group cursor-pointer hover:bg-muted/30 transition-colors">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
@@ -64,7 +65,7 @@ export default function TravelTab({ eventId, flights, onRefresh }) {
                     {f.departure_date && <span>{moment(f.departure_date).format("MMM D, h:mm A")}</span>}
                   </div>
                 </div>
-                <button onClick={() => handleDelete(f.id)} className="opacity-0 group-hover:opacity-100 p-1 hover:text-destructive transition-all">
+                <button onClick={(e) => { e.stopPropagation(); handleDelete(f.id); }} className="opacity-0 group-hover:opacity-100 p-1 hover:text-destructive transition-all">
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
@@ -72,6 +73,33 @@ export default function TravelTab({ eventId, flights, onRefresh }) {
           ))}
         </div>
       )}
+
+      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <DialogContent>
+          {selected && (
+            <>
+              <DialogHeader><DialogTitle>{selected.passenger}</DialogTitle></DialogHeader>
+              <div className="space-y-2 mt-2 text-sm">
+                <div className="flex items-center gap-2 text-base font-medium">
+                  <span>{selected.departure_city || "—"}</span>
+                  <span className="text-muted-foreground">→</span>
+                  <span>{selected.arrival_city || "—"}</span>
+                </div>
+                {selected.airline && <div><span className="text-muted-foreground">Flight: </span>{selected.airline} {selected.flight_number}</div>}
+                {selected.departure_date && <div><span className="text-muted-foreground">Departs: </span>{moment(selected.departure_date).format("MMM D, YYYY h:mm A")}</div>}
+                {selected.arrival_date && <div><span className="text-muted-foreground">Arrives: </span>{moment(selected.arrival_date).format("MMM D, YYYY h:mm A")}</div>}
+                {selected.confirmation_code && <div><span className="text-muted-foreground">Confirmation: </span><span className="font-mono">{selected.confirmation_code}</span></div>}
+                {selected.notes && (
+                  <div className="pt-2 border-t border-border">
+                    <p className="text-xs text-muted-foreground mb-1 font-medium uppercase tracking-wider">Notes</p>
+                    <p className="whitespace-pre-wrap">{selected.notes}</p>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
         <DialogContent>

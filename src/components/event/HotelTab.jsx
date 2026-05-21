@@ -12,6 +12,7 @@ export default function HotelTab({ eventId, hotels, onRefresh }) {
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ guest_name: "", hotel_name: "", address: "", check_in: "", check_out: "", room_type: "", confirmation_number: "", nightly_rate: "", notes: "" });
   const [saving, setSaving] = useState(false);
+  const [selected, setSelected] = useState(null);
 
   async function handleAdd() {
     setSaving(true);
@@ -47,7 +48,7 @@ export default function HotelTab({ eventId, hotels, onRefresh }) {
       ) : (
         <div className="space-y-3">
           {hotels.map((h) => (
-            <div key={h.id} className="bg-card border border-border rounded-lg p-4 group">
+            <div key={h.id} onClick={() => setSelected(h)} className="bg-card border border-border rounded-lg p-4 group cursor-pointer hover:bg-muted/30 transition-colors">
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
@@ -69,7 +70,7 @@ export default function HotelTab({ eventId, hotels, onRefresh }) {
                     </p>
                   )}
                 </div>
-                <button onClick={() => handleDelete(h.id)} className="opacity-0 group-hover:opacity-100 p-1 hover:text-destructive transition-all">
+                <button onClick={(e) => { e.stopPropagation(); handleDelete(h.id); }} className="opacity-0 group-hover:opacity-100 p-1 hover:text-destructive transition-all">
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
@@ -77,6 +78,30 @@ export default function HotelTab({ eventId, hotels, onRefresh }) {
           ))}
         </div>
       )}
+
+      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <DialogContent>
+          {selected && (
+            <>
+              <DialogHeader><DialogTitle>{selected.hotel_name}</DialogTitle></DialogHeader>
+              <div className="space-y-2 mt-2 text-sm">
+                <div><span className="text-muted-foreground">Guest: </span>{selected.guest_name}</div>
+                {selected.check_in && <div><span className="text-muted-foreground">Dates: </span>{moment(selected.check_in).format("MMM D")} – {selected.check_out ? moment(selected.check_out).format("MMM D, YYYY") : "?"}</div>}
+                {selected.room_type && <div><span className="text-muted-foreground">Room: </span>{selected.room_type}</div>}
+                {selected.nightly_rate && <div><span className="text-muted-foreground">Rate: </span>${selected.nightly_rate}/night</div>}
+                {selected.confirmation_number && <div><span className="text-muted-foreground">Confirmation: </span><span className="font-mono">{selected.confirmation_number}</span></div>}
+                {selected.address && <div><span className="text-muted-foreground">Address: </span>{selected.address}</div>}
+                {selected.notes && (
+                  <div className="pt-2 border-t border-border">
+                    <p className="text-xs text-muted-foreground mb-1 font-medium uppercase tracking-wider">Notes</p>
+                    <p className="whitespace-pre-wrap">{selected.notes}</p>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
         <DialogContent>

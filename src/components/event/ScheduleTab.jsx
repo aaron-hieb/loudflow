@@ -30,6 +30,7 @@ export default function ScheduleTab({ eventId, items, onRefresh }) {
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ title: "", date: "", start_time: "", end_time: "", location: "", assigned_to: "", type: "other", notes: "" });
   const [saving, setSaving] = useState(false);
+  const [selected, setSelected] = useState(null);
 
   async function handleAdd() {
     setSaving(true);
@@ -78,7 +79,7 @@ export default function ScheduleTab({ eventId, items, onRefresh }) {
               </h4>
               <div className="space-y-2">
                 {grouped[day].map((item) => (
-                  <div key={item.id} className={cn("bg-card border border-border rounded-lg p-4 border-l-4 flex items-start justify-between group", typeColors[item.type] || "border-l-muted-foreground")}>
+                  <div key={item.id} onClick={() => setSelected(item)} className={cn("bg-card border border-border rounded-lg p-4 border-l-4 flex items-start justify-between group cursor-pointer hover:bg-muted/30 transition-colors", typeColors[item.type] || "border-l-muted-foreground")}>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{typeLabels[item.type] || item.type}</span>
@@ -94,7 +95,7 @@ export default function ScheduleTab({ eventId, items, onRefresh }) {
                         {item.assigned_to && <span>{item.assigned_to}</span>}
                       </div>
                     </div>
-                    <button onClick={() => handleDelete(item.id)} className="opacity-0 group-hover:opacity-100 p-1 hover:text-destructive transition-all">
+                    <button onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }} className="opacity-0 group-hover:opacity-100 p-1 hover:text-destructive transition-all">
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
@@ -104,6 +105,33 @@ export default function ScheduleTab({ eventId, items, onRefresh }) {
           ))}
         </div>
       )}
+
+      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <DialogContent>
+          {selected && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{selected.title}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-3 mt-2 text-sm">
+                <div className="flex flex-wrap gap-3 text-muted-foreground">
+                  <span className="font-medium text-foreground uppercase text-xs tracking-wider">{typeLabels[selected.type] || selected.type}</span>
+                  {selected.date && <span>{moment(selected.date).format("ddd, MMM D, YYYY")}</span>}
+                  {selected.start_time && <span>{selected.start_time}{selected.end_time ? ` – ${selected.end_time}` : ""}</span>}
+                </div>
+                {selected.location && <div><span className="text-muted-foreground">Location: </span>{selected.location}</div>}
+                {selected.assigned_to && <div><span className="text-muted-foreground">Assigned to: </span>{selected.assigned_to}</div>}
+                {selected.notes && (
+                  <div className="pt-2 border-t border-border">
+                    <p className="text-xs text-muted-foreground mb-1 font-medium uppercase tracking-wider">Notes</p>
+                    <p className="whitespace-pre-wrap">{selected.notes}</p>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
         <DialogContent>
