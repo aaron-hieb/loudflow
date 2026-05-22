@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { CalendarDays, LayoutDashboard, Users, FolderOpen, Menu, X, Zap } from "lucide-react";
-import { useState } from "react";
+import { LayoutDashboard, Users, FolderOpen, Menu, X, Zap, Sun, Moon } from "lucide-react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/AuthContext";
 
@@ -14,6 +14,15 @@ export default function Layout() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, logout } = useAuth();
+  const [dark, setDark] = useState(() => {
+    const stored = localStorage.getItem("theme");
+    return stored ? stored === "dark" : document.documentElement.classList.contains("dark");
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+    localStorage.setItem("theme", dark ? "dark" : "light");
+  }, [dark]);
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -50,6 +59,10 @@ export default function Layout() {
           })}
         </nav>
         <div className="p-4 border-t border-border">
+          <button onClick={() => setDark(!dark)} className="flex items-center gap-2 px-3 py-2 w-full text-sm text-muted-foreground hover:text-foreground transition-colors mb-1">
+            {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            {dark ? "Light mode" : "Dark mode"}
+          </button>
           <div className="flex items-center gap-3 px-3 py-2">
             <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary">
               {user?.full_name?.[0] || user?.email?.[0] || "U"}
