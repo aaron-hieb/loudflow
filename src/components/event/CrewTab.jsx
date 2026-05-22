@@ -23,6 +23,38 @@ const statusStyles = {
 
 const emptyForm = { name: "", role: "", department: "production", phone: "", email: "", status: "confirmed", notes: "" };
 
+function ContactPopup({ person, onClose }) {
+  if (!person) return null;
+  return (
+    <Dialog open onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="max-w-xs">
+        <DialogHeader><DialogTitle>{person.name}</DialogTitle></DialogHeader>
+        <p className="text-xs text-muted-foreground -mt-2">{person.role}</p>
+        <div className="flex flex-col gap-2 mt-2">
+          {person.phone && (
+            <a href={`tel:${person.phone}`} className="flex items-center gap-3 p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors">
+              <Phone className="h-4 w-4 text-primary" />
+              <div>
+                <p className="text-xs text-muted-foreground">Call</p>
+                <p className="text-sm font-medium">{person.phone}</p>
+              </div>
+            </a>
+          )}
+          {person.email && (
+            <a href={`mailto:${person.email}`} className="flex items-center gap-3 p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors">
+              <Mail className="h-4 w-4 text-primary" />
+              <div>
+                <p className="text-xs text-muted-foreground">Email</p>
+                <p className="text-sm font-medium">{person.email}</p>
+              </div>
+            </a>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function CrewTab({ eventId, crew, onRefresh }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
@@ -31,6 +63,7 @@ export default function CrewTab({ eventId, crew, onRefresh }) {
   const [showImport, setShowImport] = useState(false);
   const [profiles, setProfiles] = useState([]);
   const [contacts, setContacts] = useState([]);
+  const [contactPopup, setContactPopup] = useState(null);
 
   useEffect(() => {
     if (showImport) loadProfiles();
@@ -134,18 +167,13 @@ export default function CrewTab({ eventId, crew, onRefresh }) {
                           </span>
                         </div>
                         <p className="text-xs text-muted-foreground">{m.role}</p>
-                        <div className="flex gap-3 mt-1">
-                          {m.email && (
-                            <a href={`mailto:${m.email}`} className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 transition-colors">
-                              <Mail className="h-3 w-3" />{m.email}
-                            </a>
-                          )}
-                          {m.phone && (
-                            <a href={`tel:${m.phone}`} className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 transition-colors">
-                              <Phone className="h-3 w-3" />{m.phone}
-                            </a>
-                          )}
-                        </div>
+                        {(m.email || m.phone) && (
+                          <button onClick={() => setContactPopup(m)}
+                            className="flex gap-3 mt-1 text-xs text-muted-foreground hover:text-primary transition-colors">
+                            {m.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{m.email}</span>}
+                            {m.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{m.phone}</span>}
+                          </button>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -163,6 +191,8 @@ export default function CrewTab({ eventId, crew, onRefresh }) {
           ))}
         </div>
       )}
+
+      <ContactPopup person={contactPopup} onClose={() => setContactPopup(null)} />
 
       {/* Import Picker Dialog */}
       <Dialog open={showImport} onOpenChange={setShowImport}>

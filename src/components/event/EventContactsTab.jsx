@@ -15,9 +15,42 @@ const categoryColors = {
   other: "bg-slate-100 text-slate-700",
 };
 
+function ContactPopup({ person, onClose }) {
+  if (!person) return null;
+  return (
+    <Dialog open onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="max-w-xs">
+        <DialogHeader><DialogTitle>{person.name}</DialogTitle></DialogHeader>
+        <p className="text-xs text-muted-foreground -mt-2">{person.role}{person.company ? ` @ ${person.company}` : ""}</p>
+        <div className="flex flex-col gap-2 mt-2">
+          {person.phone && (
+            <a href={`tel:${person.phone}`} className="flex items-center gap-3 p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors">
+              <Phone className="h-4 w-4 text-primary" />
+              <div>
+                <p className="text-xs text-muted-foreground">Call</p>
+                <p className="text-sm font-medium">{person.phone}</p>
+              </div>
+            </a>
+          )}
+          {person.email && (
+            <a href={`mailto:${person.email}`} className="flex items-center gap-3 p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors">
+              <Mail className="h-4 w-4 text-primary" />
+              <div>
+                <p className="text-xs text-muted-foreground">Email</p>
+                <p className="text-sm font-medium">{person.email}</p>
+              </div>
+            </a>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function EventContactsTab({ eventId }) {
   const [contacts, setContacts] = useState([]);
   const [showPicker, setShowPicker] = useState(false);
+  const [contactPopup, setContactPopup] = useState(null);
   const [allContacts, setAllContacts] = useState([]);
   const [linkedIds, setLinkedIds] = useState([]);
 
@@ -94,15 +127,10 @@ export default function EventContactsTab({ eventId }) {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                {c.email && (
-                  <a href={`mailto:${c.email}`} className="p-1.5 hover:text-primary transition-colors">
-                    <Mail className="h-4 w-4" />
-                  </a>
-                )}
-                {c.phone && (
-                  <a href={`tel:${c.phone}`} className="p-1.5 hover:text-primary transition-colors">
+                {(c.email || c.phone) && (
+                  <button onClick={() => setContactPopup(c)} className="p-1.5 hover:text-primary transition-colors">
                     <Phone className="h-4 w-4" />
-                  </a>
+                  </button>
                 )}
                 <button onClick={() => unlinkContact(c.id)} className="opacity-0 group-hover:opacity-100 p-1 hover:text-destructive transition-all">
                   <Trash2 className="h-4 w-4" />
@@ -112,6 +140,8 @@ export default function EventContactsTab({ eventId }) {
           ))}
         </div>
       )}
+
+      <ContactPopup person={contactPopup} onClose={() => setContactPopup(null)} />
 
       <Dialog open={showPicker} onOpenChange={setShowPicker}>
         <DialogContent>

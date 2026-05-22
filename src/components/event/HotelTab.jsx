@@ -77,9 +77,10 @@ export default function HotelTab({ eventId, hotels, onRefresh }) {
                     {h.nightly_rate && <span>${h.nightly_rate}/night</span>}
                   </div>
                   {h.address && (
-                    <p className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                    <a href={`https://maps.google.com/?q=${encodeURIComponent(h.address)}`} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1 mt-1 text-xs text-muted-foreground hover:text-primary transition-colors">
                       <MapPin className="h-3 w-3" />{h.address}
-                    </p>
+                    </a>
                   )}
                   {h.notes && <p className="mt-1.5 text-xs text-muted-foreground italic">{h.notes}</p>}
                 </div>
