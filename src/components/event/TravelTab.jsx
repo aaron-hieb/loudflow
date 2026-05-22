@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Plane, Trash2 } from "lucide-react";
+import { Plus, Plane, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,17 +8,29 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 import moment from "moment";
 
-export default function TravelTab({ eventId, flights, onRefresh }) {
-  const [showAdd, setShowAdd] = useState(false);
-  const [form, setForm] = useState({ passenger: "", airline: "", flight_number: "", departure_city: "", arrival_city: "", departure_date: "", arrival_date: "", confirmation_code: "", notes: "" });
-  const [saving, setSaving] = useState(false);
-  const [selected, setSelected] = useState(null);
+const emptyFlightForm = { passenger: "", airline: "", flight_number: "", departure_city: "", arrival_city: "", departure_date: "", arrival_date: "", confirmation_code: "", notes: "" };
 
-  async function handleAdd() {
+export default function TravelTab({ eventId, flights, onRefresh }) {
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState(emptyFlightForm);
+  const [editId, setEditId] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  function openAdd() { setForm(emptyFlightForm); setEditId(null); setShowForm(true); }
+  function openEdit(f) {
+    setForm({ passenger: f.passenger || "", airline: f.airline || "", flight_number: f.flight_number || "", departure_city: f.departure_city || "", arrival_city: f.arrival_city || "", departure_date: f.departure_date ? moment(f.departure_date).format("YYYY-MM-DDTHH:mm") : "", arrival_date: f.arrival_date ? moment(f.arrival_date).format("YYYY-MM-DDTHH:mm") : "", confirmation_code: f.confirmation_code || "", notes: f.notes || "" });
+    setEditId(f.id);
+    setShowForm(true);
+  }
+
+  async function handleSave() {
     setSaving(true);
-    await base44.entities.Flight.create({ ...form, event_id: eventId });
-    setShowAdd(false);
-    setForm({ passenger: "", airline: "", flight_number: "", departure_city: "", arrival_city: "", departure_date: "", arrival_date: "", confirmation_code: "", notes: "" });
+    if (editId) {
+      await base44.entities.Flight.update(editId, form);
+    } else {
+      await base44.entities.Flight.create({ ...form, event_id: eventId });
+    }
+    setShowForm(false);
     setSaving(false);
     onRefresh();
   }
@@ -32,7 +44,7 @@ export default function TravelTab({ eventId, flights, onRefresh }) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="font-semibold">Flights</h3>
-        <Button size="sm" onClick={() => setShowAdd(true)} className="gap-1.5">
+        <Button size="sm" onClick={openAdd} className="gap-1.5">
           <Plus className="h-3.5 w-3.5" /> Add Flight
         </Button>
       </div>
@@ -45,7 +57,7 @@ export default function TravelTab({ eventId, flights, onRefresh }) {
       ) : (
         <div className="space-y-3">
           {flights.map((f) => (
-            <div key={f.id} onClick={() => setSelected(f)} className="bg-card border border-border rounded-lg p-4 group cursor-pointer hover:bg-muted/30 transition-colors">
+            <div key={f.id} className="bg-card border border-border rounded-lg p-4 group">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
@@ -65,45 +77,19 @@ export default function TravelTab({ eventId, flights, onRefresh }) {
                     {f.departure_date && <span>{moment(f.departure_date).format("MMM D, h:mm A")}</span>}
                   </div>
                 </div>
-                <button onClick={(e) => { e.stopPropagation(); handleDelete(f.id); }} className="opacity-0 group-hover:opacity-100 p-1 hover:text-destructive transition-all">
-                  <Trash2 className="h-4 w-4" />
-                </button>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => openEdit(f)} className="p-1 hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
+                  <button onClick={() => handleDelete(f.id)} className="p-1 hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
+                </div>
               </div>
             </div>
           ))}
         </div>
       )}
 
-      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+      <Dialog open={showForm} onOpenChange={(o) => { if (!o) setShowForm(false); }}>
         <DialogContent>
-          {selected && (
-            <>
-              <DialogHeader><DialogTitle>{selected.passenger}</DialogTitle></DialogHeader>
-              <div className="space-y-2 mt-2 text-sm">
-                <div className="flex items-center gap-2 text-base font-medium">
-                  <span>{selected.departure_city || "—"}</span>
-                  <span className="text-muted-foreground">→</span>
-                  <span>{selected.arrival_city || "—"}</span>
-                </div>
-                {selected.airline && <div><span className="text-muted-foreground">Flight: </span>{selected.airline} {selected.flight_number}</div>}
-                {selected.departure_date && <div><span className="text-muted-foreground">Departs: </span>{moment(selected.departure_date).format("MMM D, YYYY h:mm A")}</div>}
-                {selected.arrival_date && <div><span className="text-muted-foreground">Arrives: </span>{moment(selected.arrival_date).format("MMM D, YYYY h:mm A")}</div>}
-                {selected.confirmation_code && <div><span className="text-muted-foreground">Confirmation: </span><span className="font-mono">{selected.confirmation_code}</span></div>}
-                {selected.notes && (
-                  <div className="pt-2 border-t border-border">
-                    <p className="text-xs text-muted-foreground mb-1 font-medium uppercase tracking-wider">Notes</p>
-                    <p className="whitespace-pre-wrap">{selected.notes}</p>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showAdd} onOpenChange={setShowAdd}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Add Flight</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editId ? "Edit Flight" : "Add Flight"}</DialogTitle></DialogHeader>
           <div className="space-y-3 mt-2">
             <div>
               <Label>Passenger *</Label>
@@ -144,9 +130,9 @@ export default function TravelTab({ eventId, flights, onRefresh }) {
               <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
             </div>
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => setShowAdd(false)}>Cancel</Button>
-              <Button onClick={handleAdd} disabled={!form.passenger || !form.departure_date || saving}>
-                {saving ? "Adding..." : "Add Flight"}
+              <Button variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
+              <Button onClick={handleSave} disabled={!form.passenger || !form.departure_date || saving}>
+                {saving ? "Saving..." : editId ? "Save Changes" : "Add Flight"}
               </Button>
             </div>
           </div>
