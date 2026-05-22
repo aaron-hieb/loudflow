@@ -76,6 +76,7 @@ export default function TravelTab({ eventId, flights, onRefresh }) {
                     {f.airline && <span>{f.airline} {f.flight_number}</span>}
                     {f.departure_date && <span>{moment(f.departure_date).format("MMM D, h:mm A")}</span>}
                   </div>
+                  {f.notes && <p className="mt-1.5 text-xs text-muted-foreground italic">{f.notes}</p>}
                 </div>
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button onClick={() => openEdit(f)} className="p-1 hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>

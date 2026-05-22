@@ -110,8 +110,9 @@ export default function ScheduleTab({ eventId, items, onRefresh }) {
                        <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
                          {item.location && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{item.location}</span>}
                          {item.assigned_to && <span>{item.assigned_to}</span>}
-                       </div>
-                     </div>
+                         </div>
+                         {item.notes && <p className="mt-1.5 text-xs text-muted-foreground italic">{item.notes}</p>}
+                         </div>
                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                        <button onClick={() => openEdit(item)} className="p-1 hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
                        <button onClick={() => handleDelete(item.id)} className="p-1 hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>

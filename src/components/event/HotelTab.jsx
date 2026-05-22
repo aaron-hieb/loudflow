@@ -81,6 +81,7 @@ export default function HotelTab({ eventId, hotels, onRefresh }) {
                       <MapPin className="h-3 w-3" />{h.address}
                     </p>
                   )}
+                  {h.notes && <p className="mt-1.5 text-xs text-muted-foreground italic">{h.notes}</p>}
                 </div>
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button onClick={() => openEdit(h)} className="p-1 hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
