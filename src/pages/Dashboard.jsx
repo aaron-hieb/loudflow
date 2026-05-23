@@ -12,7 +12,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function load() {
-      const evts = await base44.entities.Event.list("-start_date", 50);
+      const evts = await base44.entities.Event.list("start_date", 50);
       setEvents(evts);
       setLoading(false);
     }

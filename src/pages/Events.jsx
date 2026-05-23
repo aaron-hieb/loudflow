@@ -23,7 +23,7 @@ export default function Events() {
   }, []);
 
   async function loadEvents() {
-    const data = await base44.entities.Event.list("-start_date", 100);
+    const data = await base44.entities.Event.list("start_date", 100);
     setEvents(data);
     setLoading(false);
   }
