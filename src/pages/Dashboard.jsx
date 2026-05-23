@@ -19,10 +19,11 @@ export default function Dashboard() {
     load();
   }, []);
 
-  const upcoming = events.filter(e => 
-    e.status !== "completed" && e.status !== "cancelled" && 
-    moment(e.start_date).isSameOrAfter(moment(), "day")
-  ).slice(0, 6);
+  const upcoming = events.filter(e => {
+    if (e.status === "completed" || e.status === "cancelled") return false;
+    const endDate = e.end_date ? e.end_date : e.start_date;
+    return moment(endDate).isSameOrAfter(moment(), "day");
+  }).slice(0, 6);
 
   const statCards = [
     { label: "Active Events", value: events.filter(e => e.status !== "completed" && e.status !== "cancelled").length, icon: CalendarDays, color: "text-primary" },
