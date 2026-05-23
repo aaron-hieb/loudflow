@@ -9,24 +9,24 @@
     --font-sans: 'Inter', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
 
-    --background: 220 0% 22%;
-    --foreground: 222 0% 77%;
-    --card: 0 0% 0%;
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
-    --popover: 0 0% 92%;
+    --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
     --primary: 22 100% 50%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 0% 75%;
+    --secondary: 210 20% 93%;
     --secondary-foreground: 222 47% 11%;
-    --muted: 220 0% 63%;
-    --muted-foreground: 30 0% 87%;
+    --muted: 210 20% 93%;
+    --muted-foreground: 215 16% 47%;
     --accent: 25 95% 95%;
     --accent-foreground: 25 95% 30%;
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 77%;
-    --border: 220 0% 28%;
-    --input: 220 13% 91%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 20% 88%;
+    --input: 214 20% 88%;
     --ring: 25 95% 53%;
     --chart-1: 25 95% 53%;
     --chart-2: 173 58% 39%;
@@ -34,13 +34,13 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.625rem;
-    --sidebar-background: 0 0% 72%;
+    --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 222 47% 11%;
     --sidebar-primary: 25 95% 53%;
-    --sidebar-primary-foreground: 0 0% 75%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 25 95% 95%;
     --sidebar-accent-foreground: 25 95% 30%;
-    --sidebar-border: 220 0% 96%;
+    --sidebar-border: 214 20% 88%;
     --sidebar-ring: 25 95% 53%;
   }
 
