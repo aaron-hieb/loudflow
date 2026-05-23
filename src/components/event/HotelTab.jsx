@@ -10,7 +10,7 @@ import moment from "moment";
 
 const emptyHotelForm = { guest_name: "", hotel_name: "", address: "", check_in: "", check_out: "", room_type: "", confirmation_number: "", nightly_rate: "", notes: "" };
 
-export default function HotelTab({ eventId, hotels, onRefresh }) {
+export default function HotelTab({ eventId, hotels, onRefresh, isAdmin }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyHotelForm);
   const [editId, setEditId] = useState(null);
@@ -47,9 +47,11 @@ export default function HotelTab({ eventId, hotels, onRefresh }) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="font-semibold">Hotels</h3>
+        {isAdmin && (
         <Button size="sm" onClick={openAdd} className="gap-1.5">
           <Plus className="h-3.5 w-3.5" /> Add Hotel
         </Button>
+        )}
       </div>
 
       {hotels.length === 0 ? (
@@ -84,10 +86,12 @@ export default function HotelTab({ eventId, hotels, onRefresh }) {
                   )}
                   {h.notes && <p className="mt-1.5 text-xs text-muted-foreground italic">{h.notes}</p>}
                 </div>
+                {isAdmin && (
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button onClick={() => openEdit(h)} className="p-1 hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
                   <button onClick={() => handleDelete(h.id)} className="p-1 hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
                 </div>
+                )}
               </div>
             </div>
           ))}

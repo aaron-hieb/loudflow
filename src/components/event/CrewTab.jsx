@@ -55,7 +55,7 @@ function ContactPopup({ person, onClose }) {
   );
 }
 
-export default function CrewTab({ eventId, crew, onRefresh }) {
+export default function CrewTab({ eventId, crew, onRefresh, isAdmin }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
@@ -130,6 +130,7 @@ export default function CrewTab({ eventId, crew, onRefresh }) {
     <div className="space-y-6">
       <div className="flex justify-between items-center gap-2">
         <h3 className="font-semibold">Crew List <span className="text-muted-foreground font-normal text-sm">({crew.length})</span></h3>
+        {isAdmin && (
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={() => setShowImport(true)} className="gap-1.5">
             <Download className="h-3.5 w-3.5" /> Import
@@ -138,6 +139,7 @@ export default function CrewTab({ eventId, crew, onRefresh }) {
             <Plus className="h-3.5 w-3.5" /> Add Crew
           </Button>
         </div>
+        )}
       </div>
 
       {crew.length === 0 ? (
@@ -176,6 +178,7 @@ export default function CrewTab({ eventId, crew, onRefresh }) {
                         )}
                       </div>
                     </div>
+                    {isAdmin && (
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button onClick={() => openEdit(m)} className="p-1.5 hover:text-primary transition-colors">
                         <Pencil className="h-4 w-4" />
@@ -184,6 +187,7 @@ export default function CrewTab({ eventId, crew, onRefresh }) {
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
+                    )}
                   </div>
                 ))}
               </div>

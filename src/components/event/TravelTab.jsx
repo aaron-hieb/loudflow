@@ -10,7 +10,7 @@ import moment from "moment";
 
 const emptyFlightForm = { passenger: "", airline: "", flight_number: "", departure_city: "", arrival_city: "", departure_date: "", arrival_date: "", confirmation_code: "", notes: "" };
 
-export default function TravelTab({ eventId, flights, onRefresh }) {
+export default function TravelTab({ eventId, flights, onRefresh, isAdmin }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyFlightForm);
   const [editId, setEditId] = useState(null);
@@ -44,9 +44,11 @@ export default function TravelTab({ eventId, flights, onRefresh }) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="font-semibold">Flights</h3>
+        {isAdmin && (
         <Button size="sm" onClick={openAdd} className="gap-1.5">
           <Plus className="h-3.5 w-3.5" /> Add Flight
         </Button>
+        )}
       </div>
 
       {flights.length === 0 ? (
@@ -78,10 +80,12 @@ export default function TravelTab({ eventId, flights, onRefresh }) {
                   </div>
                   {f.notes && <p className="mt-1.5 text-xs text-muted-foreground italic">{f.notes}</p>}
                 </div>
+                {isAdmin && (
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button onClick={() => openEdit(f)} className="p-1 hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
                   <button onClick={() => handleDelete(f.id)} className="p-1 hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
                 </div>
+                )}
               </div>
             </div>
           ))}

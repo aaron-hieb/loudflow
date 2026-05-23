@@ -33,7 +33,7 @@ function formatTime(t) {
   return moment(t, "HH:mm").format("h:mm A");
 }
 
-export default function ScheduleTab({ eventId, items, onRefresh }) {
+export default function ScheduleTab({ eventId, items, onRefresh, isAdmin }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
@@ -77,9 +77,11 @@ export default function ScheduleTab({ eventId, items, onRefresh }) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="font-semibold">Schedule</h3>
+        {isAdmin && (
         <Button size="sm" onClick={openAdd} className="gap-1.5">
           <Plus className="h-3.5 w-3.5" /> Add Item
         </Button>
+        )}
       </div>
 
       {items.length === 0 ? (
@@ -113,10 +115,12 @@ export default function ScheduleTab({ eventId, items, onRefresh }) {
                          </div>
                          {item.notes && <p className="mt-1.5 text-xs text-muted-foreground italic">{item.notes}</p>}
                          </div>
+                     {isAdmin && (
                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                        <button onClick={() => openEdit(item)} className="p-1 hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
                        <button onClick={() => handleDelete(item.id)} className="p-1 hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
                      </div>
+                     )}
                    </div>
                 ))}
               </div>

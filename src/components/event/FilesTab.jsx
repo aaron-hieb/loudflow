@@ -24,7 +24,7 @@ const categoryColors = {
   other: "bg-slate-100 text-slate-600",
 };
 
-export default function FilesTab({ eventId, files, onRefresh }) {
+export default function FilesTab({ eventId, files, onRefresh, isAdmin }) {
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ name: "", category: "other", notes: "" });
   const [file, setFile] = useState(null);
@@ -57,9 +57,11 @@ export default function FilesTab({ eventId, files, onRefresh }) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="font-semibold">Files</h3>
+        {isAdmin && (
         <Button size="sm" onClick={() => setShowAdd(true)} className="gap-1.5">
           <Plus className="h-3.5 w-3.5" /> Upload File
         </Button>
+        )}
       </div>
 
       {files.length === 0 ? (
@@ -96,12 +98,14 @@ export default function FilesTab({ eventId, files, onRefresh }) {
                 >
                   <Download className="h-4 w-4" />
                 </a>
+                {isAdmin && (
                 <button
                   onClick={() => handleDelete(f.id)}
                   className="opacity-0 group-hover:opacity-100 p-1.5 hover:text-destructive transition-all"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
+                )}
               </div>
             </div>
           ))}

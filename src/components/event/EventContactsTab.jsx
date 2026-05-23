@@ -47,7 +47,7 @@ function ContactPopup({ person, onClose }) {
   );
 }
 
-export default function EventContactsTab({ eventId }) {
+export default function EventContactsTab({ eventId, isAdmin }) {
   const [contacts, setContacts] = useState([]);
   const [showPicker, setShowPicker] = useState(false);
   const [contactPopup, setContactPopup] = useState(null);
@@ -93,9 +93,11 @@ export default function EventContactsTab({ eventId }) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="font-semibold">Event Contacts</h3>
+        {isAdmin && (
         <Button size="sm" onClick={() => setShowPicker(true)} className="gap-1.5">
           <Plus className="h-3.5 w-3.5" /> Link Contact
         </Button>
+        )}
       </div>
 
       {contacts.length === 0 ? (
@@ -132,9 +134,11 @@ export default function EventContactsTab({ eventId }) {
                     <Phone className="h-4 w-4" />
                   </button>
                 )}
+                {isAdmin && (
                 <button onClick={() => unlinkContact(c.id)} className="opacity-0 group-hover:opacity-100 p-1 hover:text-destructive transition-all">
                   <Trash2 className="h-4 w-4" />
                 </button>
+                )}
               </div>
             </div>
           ))}

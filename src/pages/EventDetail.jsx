@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
 import { ArrowLeft, CalendarDays, MapPin, DollarSign, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,8 @@ import moment from "moment";
 export default function EventDetail() {
   const { eventId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
   const [event, setEvent] = useState(null);
   const [scheduleItems, setScheduleItems] = useState([]);
   const [flights, setFlights] = useState([]);
@@ -132,6 +135,7 @@ export default function EventDetail() {
               )}
             </div>
           </div>
+          {isAdmin && (
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => setShowEdit(true)} className="gap-1.5">
               <Pencil className="h-3.5 w-3.5" /> Edit
@@ -154,6 +158,7 @@ export default function EventDetail() {
               </AlertDialogContent>
             </AlertDialog>
           </div>
+          )}
         </div>
       </div>
 
@@ -169,25 +174,25 @@ export default function EventDetail() {
           <TabsTrigger value="files">Files</TabsTrigger>
         </TabsList>
         <TabsContent value="schedule" className="mt-6">
-          <ScheduleTab eventId={eventId} items={scheduleItems} onRefresh={loadAll} />
+          <ScheduleTab eventId={eventId} items={scheduleItems} onRefresh={loadAll} isAdmin={isAdmin} />
         </TabsContent>
         <TabsContent value="travel" className="mt-6">
-          <TravelTab eventId={eventId} flights={flights} onRefresh={loadAll} />
+          <TravelTab eventId={eventId} flights={flights} onRefresh={loadAll} isAdmin={isAdmin} />
         </TabsContent>
         <TabsContent value="hotels" className="mt-6">
-          <HotelTab eventId={eventId} hotels={hotels} onRefresh={loadAll} />
+          <HotelTab eventId={eventId} hotels={hotels} onRefresh={loadAll} isAdmin={isAdmin} />
         </TabsContent>
         <TabsContent value="gear" className="mt-6">
-          <GearTab eventId={eventId} items={gearItems} onRefresh={loadAll} />
+          <GearTab eventId={eventId} items={gearItems} onRefresh={loadAll} isAdmin={isAdmin} />
         </TabsContent>
         <TabsContent value="contacts" className="mt-6">
-          <EventContactsTab eventId={eventId} />
+          <EventContactsTab eventId={eventId} isAdmin={isAdmin} />
         </TabsContent>
         <TabsContent value="crew" className="mt-6">
-          <CrewTab eventId={eventId} crew={crew} onRefresh={loadAll} />
+          <CrewTab eventId={eventId} crew={crew} onRefresh={loadAll} isAdmin={isAdmin} />
         </TabsContent>
         <TabsContent value="files" className="mt-6">
-          <FilesTab eventId={eventId} files={eventFiles} onRefresh={loadAll} />
+          <FilesTab eventId={eventId} files={eventFiles} onRefresh={loadAll} isAdmin={isAdmin} />
         </TabsContent>
       </Tabs>
 
