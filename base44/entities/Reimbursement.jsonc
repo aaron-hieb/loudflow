@@ -1,0 +1,48 @@
+{
+  "name": "Reimbursement",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "title": "Event ID"
+    },
+    "receipt_url": {
+      "type": "string",
+      "title": "Receipt"
+    },
+    "amount": {
+      "type": "number",
+      "title": "Amount"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    },
+    "reimbursement_to": {
+      "type": "string",
+      "title": "Reimburse To"
+    },
+    "submitted_by": {
+      "type": "string",
+      "title": "Submitted By"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes to Admin"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "title": "Status"
+    }
+  },
+  "required": [
+    "event_id",
+    "receipt_url",
+    "reimbursement_to"
+  ]
+}

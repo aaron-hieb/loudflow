@@ -23,6 +23,7 @@ import EventContactsTab from "../components/event/EventContactsTab";
 import FilesTab from "../components/event/FilesTab";
 import CrewTab from "../components/event/CrewTab";
 import VenueTab from "../components/event/VenueTab";
+import ReimbursementsTab from "../components/event/ReimbursementsTab";
 import moment from "moment";
 
 export default function EventDetail() {
@@ -173,6 +174,7 @@ export default function EventDetail() {
           <TabsTrigger value="contacts">Contacts</TabsTrigger>
           <TabsTrigger value="crew">Crew</TabsTrigger>
           <TabsTrigger value="venue">Venue</TabsTrigger>
+          <TabsTrigger value="reimbursements">Reimbursements</TabsTrigger>
           <TabsTrigger value="files">Files</TabsTrigger>
         </TabsList>
         <TabsContent value="schedule" className="mt-6">
@@ -195,6 +197,9 @@ export default function EventDetail() {
         </TabsContent>
         <TabsContent value="venue" className="mt-6">
           <VenueTab eventId={eventId} isAdmin={isAdmin} />
+        </TabsContent>
+        <TabsContent value="reimbursements" className="mt-6">
+          <ReimbursementsTab eventId={eventId} isAdmin={isAdmin} />
         </TabsContent>
         <TabsContent value="files" className="mt-6">
           <FilesTab eventId={eventId} files={eventFiles} onRefresh={loadAll} isAdmin={isAdmin} />
