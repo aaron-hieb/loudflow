@@ -1,0 +1,74 @@
+{
+  "name": "VenueInfo",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "title": "Event ID"
+    },
+    "venue_name": {
+      "type": "string",
+      "title": "Venue Name"
+    },
+    "address": {
+      "type": "string",
+      "title": "Address"
+    },
+    "city": {
+      "type": "string",
+      "title": "City"
+    },
+    "state": {
+      "type": "string",
+      "title": "State/Province"
+    },
+    "zip": {
+      "type": "string",
+      "title": "Zip/Postal Code"
+    },
+    "country": {
+      "type": "string",
+      "title": "Country"
+    },
+    "capacity": {
+      "type": "number",
+      "title": "Capacity"
+    },
+    "contact_name": {
+      "type": "string",
+      "title": "Venue Contact Name"
+    },
+    "contact_phone": {
+      "type": "string",
+      "title": "Venue Contact Phone"
+    },
+    "contact_email": {
+      "type": "string",
+      "format": "email",
+      "title": "Venue Contact Email"
+    },
+    "load_in_time": {
+      "type": "string",
+      "title": "Load-In Time"
+    },
+    "load_out_time": {
+      "type": "string",
+      "title": "Load-Out Time"
+    },
+    "parking_info": {
+      "type": "string",
+      "title": "Parking Info"
+    },
+    "wifi_info": {
+      "type": "string",
+      "title": "WiFi Info"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "event_id"
+  ]
+}

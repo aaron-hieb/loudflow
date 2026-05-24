@@ -22,6 +22,7 @@ import GearTab from "../components/event/GearTab";
 import EventContactsTab from "../components/event/EventContactsTab";
 import FilesTab from "../components/event/FilesTab";
 import CrewTab from "../components/event/CrewTab";
+import VenueTab from "../components/event/VenueTab";
 import moment from "moment";
 
 export default function EventDetail() {
@@ -171,6 +172,7 @@ export default function EventDetail() {
           <TabsTrigger value="gear">Gear</TabsTrigger>
           <TabsTrigger value="contacts">Contacts</TabsTrigger>
           <TabsTrigger value="crew">Crew</TabsTrigger>
+          <TabsTrigger value="venue">Venue</TabsTrigger>
           <TabsTrigger value="files">Files</TabsTrigger>
         </TabsList>
         <TabsContent value="schedule" className="mt-6">
@@ -190,6 +192,9 @@ export default function EventDetail() {
         </TabsContent>
         <TabsContent value="crew" className="mt-6">
           <CrewTab eventId={eventId} crew={crew} onRefresh={loadAll} isAdmin={isAdmin} />
+        </TabsContent>
+        <TabsContent value="venue" className="mt-6">
+          <VenueTab eventId={eventId} isAdmin={isAdmin} />
         </TabsContent>
         <TabsContent value="files" className="mt-6">
           <FilesTab eventId={eventId} files={eventFiles} onRefresh={loadAll} isAdmin={isAdmin} />
