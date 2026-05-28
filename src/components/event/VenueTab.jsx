@@ -21,10 +21,11 @@ const WMO_EMOJI = {
 };
 
 async function fetchWeather(city, startDate, endDate) {
-  // Geocode city
-  const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&format=json`);
+  // Geocode city — use just the city name part before any comma for better results
+  const cityName = city.split(",")[0].trim();
+  const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&format=json`);
   const geoData = await geoRes.json();
-  if (!geoData.results?.length) return null;
+  if (!geoData.results?.length) return [];
   const { latitude, longitude } = geoData.results[0];
 
   // Clamp dates to forecast window (Open-Meteo supports up to 16 days ahead)
@@ -32,13 +33,13 @@ async function fetchWeather(city, startDate, endDate) {
   const maxForecast = moment().add(16, "days").format("YYYY-MM-DD");
   const start = startDate < today ? today : startDate;
   const end = endDate > maxForecast ? maxForecast : endDate;
-  if (start > end) return null;
+  if (start > end) return [];
 
   const wxRes = await fetch(
     `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum&temperature_unit=fahrenheit&timezone=auto&start_date=${start}&end_date=${end}&forecast_days=16`
   );
   const wxData = await wxRes.json();
-  if (!wxData.daily?.time?.length) return null;
+  if (!wxData.daily?.time?.length) return [];
 
   return wxData.daily.time.map((date, i) => ({
     date,
@@ -185,7 +186,7 @@ export default function VenueTab({ eventId, isAdmin, startDate, endDate, city })
         <CloudSun className="h-4 w-4 text-primary" />
         <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Weather Forecast — {weatherCity}</p>
       </div>
-      {weatherLoading ? (
+      {weatherLoading || weather === null ? (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <div className="w-4 h-4 border-2 border-muted border-t-primary rounded-full animate-spin" />
           Loading forecast…
