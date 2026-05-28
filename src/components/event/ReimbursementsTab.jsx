@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Receipt, Plus, Loader2, ExternalLink, Trash2 } from "lucide-react";
+import { Receipt, Plus, Loader2, ExternalLink, Trash2, Camera } from "lucide-react";
 
 const statusStyles = {
   pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
@@ -160,19 +160,26 @@ export default function ReimbursementsTab({ eventId, isAdmin }) {
                     </a>
                     <Button variant="ghost" size="sm" onClick={() => setForm((f) => ({ ...f, receipt_url: "" }))}>Change</Button>
                   </div>
+                ) : uploading ? (
+                  <div className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-lg p-6">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground mt-2">Uploading...</span>
+                  </div>
                 ) : (
-                  <label className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-lg p-6 cursor-pointer hover:border-primary transition-colors">
-                    {uploading ? (
-                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                    ) : (
-                      <>
-                        <Receipt className="h-6 w-6 text-muted-foreground mb-2" />
-                        <span className="text-sm text-muted-foreground">Click to upload receipt</span>
-                        <span className="text-xs text-muted-foreground mt-1">Photo or PDF</span>
-                      </>
-                    )}
-                    <input type="file" accept="image/*,application/pdf" className="hidden" onChange={handleFileChange} disabled={uploading} />
-                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <label className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-lg p-4 cursor-pointer hover:border-primary transition-colors">
+                      <Receipt className="h-6 w-6 text-muted-foreground mb-2" />
+                      <span className="text-xs text-muted-foreground text-center">Choose file</span>
+                      <span className="text-xs text-muted-foreground text-center">Image or PDF</span>
+                      <input type="file" accept="image/*,application/pdf" className="hidden" onChange={handleFileChange} />
+                    </label>
+                    <label className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-lg p-4 cursor-pointer hover:border-primary transition-colors">
+                      <Camera className="h-6 w-6 text-muted-foreground mb-2" />
+                      <span className="text-xs text-muted-foreground text-center">Scan receipt</span>
+                      <span className="text-xs text-muted-foreground text-center">Use camera</span>
+                      <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} />
+                    </label>
+                  </div>
                 )}
               </div>
             </div>
