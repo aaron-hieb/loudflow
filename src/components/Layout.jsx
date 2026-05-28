@@ -85,6 +85,9 @@ export default function Layout() {
           </div>
           <span className="font-bold text-base">Prodflow</span>
         </Link>
+        <button onClick={() => setDark(!dark)} className="p-2 text-muted-foreground hover:text-foreground transition-colors">
+          {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+        </button>
         <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2">
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
