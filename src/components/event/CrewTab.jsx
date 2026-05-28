@@ -50,6 +50,9 @@ function ContactPopup({ person, onClose }) {
             </a>
           )}
         </div>
+        {person.notes && (
+          <p className="text-xs text-muted-foreground bg-muted/50 rounded px-3 py-2 mt-1">{person.notes}</p>
+        )}
       </DialogContent>
     </Dialog>
   );
