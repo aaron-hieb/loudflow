@@ -108,7 +108,7 @@ export default function EventContactsTab({ eventId, isAdmin }) {
       ) : (
         <div className="space-y-2">
           {contacts.map((c) => (
-            <div key={c.id} className="bg-card border border-border rounded-lg p-4 flex items-center justify-between group">
+            <div key={c.id} onClick={() => setContactPopup(c)} className="bg-card border border-border rounded-lg p-4 flex items-center justify-between group cursor-pointer hover:border-primary/40 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary">
                   {c.name?.[0] || "?"}
@@ -130,13 +130,8 @@ export default function EventContactsTab({ eventId, isAdmin }) {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                {(c.email || c.phone) && (
-                  <button onClick={() => setContactPopup(c)} className="p-1.5 hover:text-primary transition-colors">
-                    <Phone className="h-4 w-4" />
-                  </button>
-                )}
                 {isAdmin && (
-                <button onClick={() => unlinkContact(c.id)} className="opacity-0 group-hover:opacity-100 p-1 hover:text-destructive transition-all">
+                <button onClick={(e) => { e.stopPropagation(); unlinkContact(c.id); }} className="opacity-0 group-hover:opacity-100 p-1 hover:text-destructive transition-all">
                   <Trash2 className="h-4 w-4" />
                 </button>
                 )}
