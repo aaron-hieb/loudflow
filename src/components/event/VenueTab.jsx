@@ -36,7 +36,7 @@ async function fetchWeather(city, startDate, endDate) {
   if (start > end) return [];
 
   const wxRes = await fetch(
-    `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum&temperature_unit=fahrenheit&timezone=auto&start_date=${start}&end_date=${end}&forecast_days=16`
+    `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum&temperature_unit=fahrenheit&timezone=auto&start_date=${start}&end_date=${end}`
   );
   const wxData = await wxRes.json();
   if (!wxData.daily?.time?.length) return [];
