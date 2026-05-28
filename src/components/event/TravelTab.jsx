@@ -98,14 +98,19 @@ export default function TravelTab({ eventId, flights, onRefresh, isAdmin }) {
                       <span className="text-xs bg-muted px-2 py-0.5 rounded font-mono">{f.confirmation_code}</span>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="font-medium">{f.departure_city || "—"}</span>
-                    <span className="text-muted-foreground">→</span>
-                    <span className="font-medium">{f.arrival_city || "—"}</span>
+                  <div className="flex items-center gap-4 text-sm">
+                   <div className="text-center">
+                     <p className="font-semibold">{f.departure_city || "—"}</p>
+                     {f.departure_date && <p className="text-xs text-muted-foreground">{moment(f.departure_date).format("MMM D, h:mm A")}</p>}
+                   </div>
+                   <span className="text-muted-foreground text-lg">→</span>
+                   <div className="text-center">
+                     <p className="font-semibold">{f.arrival_city || "—"}</p>
+                     {f.arrival_date && <p className="text-xs text-muted-foreground">{moment(f.arrival_date).format("MMM D, h:mm A")}</p>}
+                   </div>
                   </div>
-                  <div className="flex gap-4 mt-1.5 text-xs text-muted-foreground">
-                    {f.airline && <span>{f.airline} {f.flight_number}</span>}
-                    {f.departure_date && <span>{moment(f.departure_date).format("MMM D, h:mm A")}</span>}
+                  <div className="mt-1.5 text-xs text-muted-foreground">
+                   {f.airline && <span>{f.airline} {f.flight_number}</span>}
                   </div>
                   {f.notes && <p className="mt-1.5 text-xs text-muted-foreground italic">{f.notes}</p>}
 
