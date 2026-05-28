@@ -126,6 +126,7 @@ export default function EventContactsTab({ eventId, isAdmin }) {
                     {c.role && <span>{c.role}</span>}
                     {c.company && <span>@ {c.company}</span>}
                   </div>
+                  {c.notes && <p className="text-xs text-muted-foreground italic mt-1">{c.notes}</p>}
                 </div>
               </div>
               <div className="flex items-center gap-2">

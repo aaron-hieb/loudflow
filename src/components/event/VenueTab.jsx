@@ -149,18 +149,24 @@ export default function VenueTab({ eventId, isAdmin }) {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {(venue.address || venue.city) && (
-          <div className="bg-card border border-border rounded-xl p-4 flex gap-3">
-            <MapPin className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-            <div>
-              <p className="text-xs text-muted-foreground mb-1">Address</p>
-              {venue.address && <p className="text-sm font-medium">{venue.address}</p>}
-              <p className="text-sm text-muted-foreground">
-                {[venue.city, venue.state, venue.zip, venue.country].filter(Boolean).join(", ")}
-              </p>
-            </div>
-          </div>
-        )}
+        {(venue.address || venue.city) && (() => {
+          const mapsQuery = encodeURIComponent([venue.address, venue.city, venue.state, venue.zip, venue.country].filter(Boolean).join(" "));
+          const mapsUrl = `https://maps.google.com/?q=${mapsQuery}`;
+          return (
+            <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="block">
+              <div className="bg-card border border-border rounded-xl p-4 flex gap-3 hover:border-primary transition-colors cursor-pointer">
+                <MapPin className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Address <span className="text-primary">(tap to open maps)</span></p>
+                  {venue.address && <p className="text-sm font-medium">{venue.address}</p>}
+                  <p className="text-sm text-muted-foreground">
+                    {[venue.city, venue.state, venue.zip, venue.country].filter(Boolean).join(", ")}
+                  </p>
+                </div>
+              </div>
+            </a>
+          );
+        })()}
 
         {venue.capacity && (
           <div className="bg-card border border-border rounded-xl p-4 flex gap-3">

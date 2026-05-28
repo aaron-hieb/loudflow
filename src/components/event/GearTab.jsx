@@ -87,6 +87,7 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
                       <div>
                         <p className="font-medium text-sm">{item.name}</p>
                         {item.assigned_to && <p className="text-xs text-muted-foreground">{item.assigned_to}</p>}
+                        {item.notes && <p className="text-xs text-muted-foreground italic mt-0.5">{item.notes}</p>}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
