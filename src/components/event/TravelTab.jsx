@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Plane, Trash2, Pencil } from "lucide-react";
+import { Plus, Plane, Trash2, Pencil, RefreshCw, CheckCircle2, AlertCircle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,11 +10,40 @@ import moment from "moment";
 
 const emptyFlightForm = { passenger: "", airline: "", flight_number: "", departure_city: "", arrival_city: "", departure_date: "", arrival_date: "", confirmation_code: "", notes: "" };
 
+const statusConfig = {
+  scheduled: { label: "Scheduled", color: "text-blue-600 bg-blue-50", icon: Clock },
+  active: { label: "In Air", color: "text-emerald-600 bg-emerald-50", icon: Plane },
+  landed: { label: "Landed", color: "text-green-600 bg-green-50", icon: CheckCircle2 },
+  cancelled: { label: "Cancelled", color: "text-red-600 bg-red-50", icon: AlertCircle },
+  incident: { label: "Incident", color: "text-orange-600 bg-orange-50", icon: AlertCircle },
+  diverted: { label: "Diverted", color: "text-yellow-600 bg-yellow-50", icon: AlertCircle },
+};
+
+function FlightStatusBadge({ status }) {
+  const cfg = statusConfig[status] || { label: status, color: "text-slate-600 bg-slate-100", icon: Clock };
+  const Icon = cfg.icon;
+  return (
+    <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${cfg.color}`}>
+      <Icon className="h-3 w-3" />{cfg.label}
+    </span>
+  );
+}
+
 export default function TravelTab({ eventId, flights, onRefresh, isAdmin }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyFlightForm);
   const [editId, setEditId] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [liveStatus, setLiveStatus] = useState({});
+  const [loadingStatus, setLoadingStatus] = useState({});
+
+  async function fetchFlightStatus(flightId, flightNumber) {
+    if (!flightNumber) return;
+    setLoadingStatus((p) => ({ ...p, [flightId]: true }));
+    const res = await base44.functions.invoke('flightStatus', { flight_number: flightNumber });
+    setLiveStatus((p) => ({ ...p, [flightId]: res.data }));
+    setLoadingStatus((p) => ({ ...p, [flightId]: false }));
+  }
 
   function openAdd() { setForm(emptyFlightForm); setEditId(null); setShowForm(true); }
   function openEdit(f) {
@@ -79,18 +108,57 @@ export default function TravelTab({ eventId, flights, onRefresh, isAdmin }) {
                     {f.departure_date && <span>{moment(f.departure_date).format("MMM D, h:mm A")}</span>}
                   </div>
                   {f.notes && <p className="mt-1.5 text-xs text-muted-foreground italic">{f.notes}</p>}
+
+                  {/* Live status */}
+                  {liveStatus[f.id] && liveStatus[f.id].found && (
+                    <div className="mt-3 pt-3 border-t border-border space-y-2">
+                      <div className="flex items-center gap-2">
+                        <FlightStatusBadge status={liveStatus[f.id].flight_status} />
+                        {liveStatus[f.id].departure?.delay > 0 && (
+                          <span className="text-xs text-orange-600 font-medium">+{liveStatus[f.id].departure.delay} min delay</span>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 text-xs">
+                        <div>
+                          <p className="text-muted-foreground mb-0.5">Departure</p>
+                          {liveStatus[f.id].departure?.terminal && <p>Terminal {liveStatus[f.id].departure.terminal}{liveStatus[f.id].departure.gate ? ` · Gate ${liveStatus[f.id].departure.gate}` : ""}</p>}
+                          {liveStatus[f.id].departure?.estimated && <p className="text-muted-foreground">{moment(liveStatus[f.id].departure.estimated).format("h:mm A")} est.</p>}
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground mb-0.5">Arrival</p>
+                          {liveStatus[f.id].arrival?.terminal && <p>Terminal {liveStatus[f.id].arrival.terminal}{liveStatus[f.id].arrival.gate ? ` · Gate ${liveStatus[f.id].arrival.gate}` : ""}</p>}
+                          {liveStatus[f.id].arrival?.estimated && <p className="text-muted-foreground">{moment(liveStatus[f.id].arrival.estimated).format("h:mm A")} est.</p>}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {liveStatus[f.id] && !liveStatus[f.id].found && (
+                    <p className="mt-2 text-xs text-muted-foreground italic">No live data found for this flight.</p>
+                  )}
                 </div>
+                <div className="flex flex-col items-end gap-2">
+                  {f.flight_number && (
+                    <button
+                      onClick={() => fetchFlightStatus(f.id, f.flight_number)}
+                      disabled={loadingStatus[f.id]}
+                      className="flex items-center gap-1 text-xs text-primary hover:underline disabled:opacity-50"
+                    >
+                      <RefreshCw className={`h-3 w-3 ${loadingStatus[f.id] ? "animate-spin" : ""}`} />
+                      {liveStatus[f.id] ? "Refresh" : "Live Status"}
+                    </button>
+                  )}
                 {isAdmin && (
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button onClick={() => openEdit(f)} className="p-1 hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
                   <button onClick={() => handleDelete(f.id)} className="p-1 hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
                 </div>
                 )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+                </div>
+                </div>
+                </div>
+                ))}
+                </div>
+                )}
 
       <Dialog open={showForm} onOpenChange={(o) => { if (!o) setShowForm(false); }}>
         <DialogContent>
