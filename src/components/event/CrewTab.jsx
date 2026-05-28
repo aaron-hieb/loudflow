@@ -21,7 +21,7 @@ const statusStyles = {
   cancelled: "bg-red-100 text-red-700",
 };
 
-const emptyForm = { name: "", role: "", department: "production", phone: "", email: "", status: "confirmed", notes: "" };
+const emptyForm = { name: "", role: "", department: "production", phone: "", email: "", status: "confirmed", notes: "", emergency_contact_name: "", emergency_contact_phone: "", emergency_contact_relationship: "" };
 
 function ContactPopup({ person, onClose }) {
   if (!person) return null;
@@ -113,6 +113,9 @@ export default function CrewTab({ eventId, crew, onRefresh, isAdmin }) {
       name: member.name || "", role: member.role || "", department: member.department || "other",
       phone: member.phone || "", email: member.email || "", status: member.status || "confirmed",
       notes: member.notes || "",
+      emergency_contact_name: member.emergency_contact_name || "",
+      emergency_contact_phone: member.emergency_contact_phone || "",
+      emergency_contact_relationship: member.emergency_contact_relationship || "",
     });
     setEditId(member.id);
     setShowForm(true);
@@ -268,6 +271,23 @@ export default function CrewTab({ eventId, crew, onRefresh, isAdmin }) {
             <div>
               <Label>Notes</Label>
               <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+            </div>
+            <div className="border-t border-border pt-3">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Emergency Contact</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Contact Name</Label>
+                  <Input placeholder="e.g. Jane Doe" value={form.emergency_contact_name} onChange={(e) => setForm({ ...form, emergency_contact_name: e.target.value })} />
+                </div>
+                <div>
+                  <Label>Relationship</Label>
+                  <Input placeholder="e.g. Spouse, Parent" value={form.emergency_contact_relationship} onChange={(e) => setForm({ ...form, emergency_contact_relationship: e.target.value })} />
+                </div>
+                <div className="col-span-2">
+                  <Label>Contact Phone</Label>
+                  <Input placeholder="Phone number" value={form.emergency_contact_phone} onChange={(e) => setForm({ ...form, emergency_contact_phone: e.target.value })} />
+                </div>
+              </div>
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
