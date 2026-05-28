@@ -13,7 +13,7 @@ const categoryLabels = {
   power: "Power", rigging: "Rigging", backline: "Backline", other: "Other",
 };
 
-const emptyGearForm = { name: "", category: "audio", quantity: 1, status: "needed", assigned_to: "", notes: "" };
+const emptyGearForm = { name: "", category: "audio", quantity: 1, status: "in_shop", assigned_to: "", notes: "" };
 
 export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
   const [showForm, setShowForm] = useState(false);
@@ -94,12 +94,11 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
                       <Select value={item.status} onValueChange={(v) => handleStatusChange(item.id, v)}>
                         <SelectTrigger className="h-7 w-28 text-xs"><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="needed">Needed</SelectItem>
-                          <SelectItem value="reserved">Reserved</SelectItem>
+                          <SelectItem value="in_shop">In Shop</SelectItem>
+                          <SelectItem value="prepped">Prepped</SelectItem>
                           <SelectItem value="packed">Packed</SelectItem>
-                          <SelectItem value="shipped">Shipped</SelectItem>
-                          <SelectItem value="on_site">On Site</SelectItem>
-                          <SelectItem value="returned">Returned</SelectItem>
+                          <SelectItem value="unloaded">Unloaded</SelectItem>
+                          <SelectItem value="unpacked">Unpacked</SelectItem>
                         </SelectContent>
                       </Select>
                       {isAdmin && (
@@ -144,10 +143,12 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
                 <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="needed">Needed</SelectItem>
-                    <SelectItem value="reserved">Reserved</SelectItem>
+                    <SelectItem value="in_shop">In Shop</SelectItem>
+                    <SelectItem value="prepped">Prepped</SelectItem>
                     <SelectItem value="packed">Packed</SelectItem>
-                  </SelectContent>
+                    <SelectItem value="unloaded">Unloaded</SelectItem>
+                    <SelectItem value="unpacked">Unpacked</SelectItem>
+                    </SelectContent>
                 </Select>
               </div>
               <div>

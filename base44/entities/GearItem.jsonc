@@ -31,12 +31,11 @@
     "status": {
       "type": "string",
       "enum": [
-        "needed",
-        "reserved",
+        "in_shop",
+        "prepped",
         "packed",
-        "shipped",
-        "on_site",
-        "returned"
+        "unloaded",
+        "unpacked"
       ],
       "title": "Status"
     },
