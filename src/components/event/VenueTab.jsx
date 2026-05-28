@@ -66,16 +66,15 @@ export default function VenueTab({ eventId, isAdmin, startDate, endDate, city })
     load();
   }, [eventId]);
 
-  const weatherCity = city || venue?.city || form?.city;
-
   useEffect(() => {
+    const weatherCity = city || venue?.city;
     if (!weatherCity || !startDate) return;
     setWeatherLoading(true);
     setWeather(null);
     fetchWeather(weatherCity, startDate, endDate || startDate)
       .then(setWeather)
       .finally(() => setWeatherLoading(false));
-  }, [weatherCity, startDate, endDate]);
+  }, [city, venue, startDate, endDate]);
 
   async function load() {
     const results = await base44.entities.VenueInfo.filter({ event_id: eventId });
@@ -179,6 +178,7 @@ export default function VenueTab({ eventId, isAdmin, startDate, endDate, city })
     );
   }
 
+  const weatherCity = city || venue?.city;
   const weatherCard = weatherCity && startDate ? (
     <div className="bg-card border border-border rounded-xl p-4">
       <div className="flex items-center gap-2 mb-3">
