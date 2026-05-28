@@ -18,7 +18,7 @@ const categoryColors = {
   other: "bg-slate-100 text-slate-700",
 };
 
-const emptyForm = { name: "", role: "", company: "", email: "", phone: "", category: "crew", notes: "" };
+const emptyForm = { name: "", role: "", company: "", email: "", phone: "", category: "crew", notes: "", emergency_contact_name: "", emergency_contact_phone: "", emergency_contact_relationship: "" };
 
 export default function Contacts() {
   const [contacts, setContacts] = useState([]);
@@ -62,6 +62,9 @@ export default function Contacts() {
       name: contact.name || "", role: contact.role || "", company: contact.company || "",
       email: contact.email || "", phone: contact.phone || "", category: contact.category || "other",
       notes: contact.notes || "",
+      emergency_contact_name: contact.emergency_contact_name || "",
+      emergency_contact_phone: contact.emergency_contact_phone || "",
+      emergency_contact_relationship: contact.emergency_contact_relationship || "",
     });
     setEditId(contact.id);
     setShowForm(true);
@@ -206,6 +209,25 @@ export default function Contacts() {
               <Label>Notes</Label>
               <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
             </div>
+            {form.category === "crew" && (
+              <div className="border-t border-border pt-3">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Emergency Contact</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label>Contact Name</Label>
+                    <Input placeholder="e.g. Jane Doe" value={form.emergency_contact_name} onChange={(e) => setForm({ ...form, emergency_contact_name: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label>Relationship</Label>
+                    <Input placeholder="e.g. Spouse, Parent" value={form.emergency_contact_relationship} onChange={(e) => setForm({ ...form, emergency_contact_relationship: e.target.value })} />
+                  </div>
+                  <div className="col-span-2">
+                    <Label>Contact Phone</Label>
+                    <Input placeholder="Phone number" value={form.emergency_contact_phone} onChange={(e) => setForm({ ...form, emergency_contact_phone: e.target.value })} />
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
               <Button onClick={handleSave} disabled={!form.name || saving}>

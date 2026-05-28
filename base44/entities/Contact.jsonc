@@ -38,6 +38,18 @@
     "notes": {
       "type": "string",
       "title": "Notes"
+    },
+    "emergency_contact_name": {
+      "type": "string",
+      "title": "Emergency Contact Name"
+    },
+    "emergency_contact_phone": {
+      "type": "string",
+      "title": "Emergency Contact Phone"
+    },
+    "emergency_contact_relationship": {
+      "type": "string",
+      "title": "Relationship"
     }
   },
   "required": [
