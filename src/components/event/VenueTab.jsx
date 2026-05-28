@@ -67,10 +67,10 @@ export default function VenueTab({ eventId, isAdmin, startDate, endDate, city })
   }, [eventId]);
 
   useEffect(() => {
-    const weatherCity = city;
-    if (!weatherCity || !startDate) return;
+    if (!city || !startDate) return;
     setWeatherLoading(true);
-    fetchWeather(weatherCity, startDate, endDate || startDate)
+    setWeather(null);
+    fetchWeather(city, startDate, endDate || startDate)
       .then(setWeather)
       .finally(() => setWeatherLoading(false));
   }, [city, startDate, endDate]);
@@ -177,16 +177,49 @@ export default function VenueTab({ eventId, isAdmin, startDate, endDate, city })
     );
   }
 
+  const weatherCard = city && startDate ? (
+    <div className="bg-card border border-border rounded-xl p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <CloudSun className="h-4 w-4 text-primary" />
+        <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Weather Forecast — {city}</p>
+      </div>
+      {weatherLoading ? (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="w-4 h-4 border-2 border-muted border-t-primary rounded-full animate-spin" />
+          Loading forecast…
+        </div>
+      ) : weather?.length ? (
+        <div className="flex gap-3 overflow-x-auto pb-1">
+          {weather.map((day) => (
+            <div key={day.date} className="flex flex-col items-center gap-1 min-w-[64px] bg-muted/40 rounded-lg p-2">
+              <p className="text-xs text-muted-foreground">{moment(day.date).format("ddd M/D")}</p>
+              <span className="text-2xl">{WMO_EMOJI[day.code] ?? "🌡"}</span>
+              <p className="text-xs font-semibold">{day.high}°</p>
+              <p className="text-xs text-muted-foreground">{day.low}°</p>
+              <p className="text-xs text-center text-muted-foreground leading-tight">{WMO_CODES[day.code] ?? ""}</p>
+              {day.precip > 0 && <p className="text-xs text-blue-500">💧{day.precip}"</p>}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground">Forecast not available — Open-Meteo only supports up to 16 days ahead.</p>
+      )}
+    </div>
+  ) : null;
+
   if (!venue || !venue.venue_name) {
     return (
-      <div className="bg-card rounded-xl border border-border p-12 text-center">
-        <MapPin className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-        <p className="text-muted-foreground mb-4">No venue information added yet</p>
-        {isAdmin && (
-          <Button onClick={() => setEditing(true)} className="gap-2">
-            <Pencil className="h-4 w-4" /> Add Venue Info
-          </Button>
-        )}
+      <div className="space-y-4">
+        <div className="bg-card rounded-xl border border-border p-12 text-center">
+          <MapPin className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+          <p className="text-muted-foreground mb-4">No venue information added yet</p>
+          {isAdmin && (
+            <Button onClick={() => setEditing(true)} className="gap-2">
+              <Pencil className="h-4 w-4" /> Add Venue Info
+            </Button>
+          )}
+        </div>
+        {weatherCard}
       </div>
     );
   }
@@ -287,36 +320,7 @@ export default function VenueTab({ eventId, isAdmin, startDate, endDate, city })
         </div>
       )}
 
-      {/* Weather */}
-      {(weatherLoading || weather) && (
-        <div className="bg-card border border-border rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <CloudSun className="h-4 w-4 text-primary" />
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Weather Forecast</p>
-          </div>
-          {weatherLoading ? (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <div className="w-4 h-4 border-2 border-muted border-t-primary rounded-full animate-spin" />
-              Loading forecast…
-            </div>
-          ) : weather?.length ? (
-            <div className="flex gap-3 overflow-x-auto pb-1">
-              {weather.map((day) => (
-                <div key={day.date} className="flex flex-col items-center gap-1 min-w-[60px] bg-muted/40 rounded-lg p-2">
-                  <p className="text-xs text-muted-foreground">{moment(day.date).format("ddd M/D")}</p>
-                  <span className="text-2xl">{WMO_EMOJI[day.code] ?? "🌡"}</span>
-                  <p className="text-xs font-medium">{day.high}°</p>
-                  <p className="text-xs text-muted-foreground">{day.low}°</p>
-                  <p className="text-xs text-muted-foreground">{WMO_CODES[day.code] ?? ""}</p>
-                  {day.precip > 0 && <p className="text-xs text-blue-500">💧{day.precip}"</p>}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">Forecast not available for these dates (only works within 16 days).</p>
-          )}
-        </div>
-      )}
+      {weatherCard}
     </div>
   );
 }
