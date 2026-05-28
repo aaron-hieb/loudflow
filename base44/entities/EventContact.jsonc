@@ -1,0 +1,35 @@
+{
+  "name": "EventContact",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "title": "Event ID"
+    },
+    "contact_id": {
+      "type": "string",
+      "title": "Contact ID"
+    }
+  },
+  "required": [
+    "event_id",
+    "contact_id"
+  ],
+  "rls": {
+    "create": null,
+    "read": null,
+    "update": null,
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

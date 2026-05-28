@@ -52,42 +52,37 @@ export default function EventContactsTab({ eventId, isAdmin }) {
   const [showPicker, setShowPicker] = useState(false);
   const [contactPopup, setContactPopup] = useState(null);
   const [allContacts, setAllContacts] = useState([]);
-  const [linkedIds, setLinkedIds] = useState([]);
-
-  // For simplicity, we'll store event-contact links as a comma-separated list in localStorage
-  // In a real app you'd have a junction entity
-  const storageKey = `event_contacts_${eventId}`;
+  const [links, setLinks] = useState([]); // EventContact records
 
   useEffect(() => {
     loadContacts();
   }, [eventId]);
 
   async function loadContacts() {
-    const stored = localStorage.getItem(storageKey);
-    const ids = stored ? stored.split(",").filter(Boolean) : [];
-    setLinkedIds(ids);
-    
-    const all = await base44.entities.Contact.list("-created_date", 100);
+    const [all, eventLinks] = await Promise.all([
+      base44.entities.Contact.list("-created_date", 200),
+      base44.entities.EventContact.filter({ event_id: eventId }),
+    ]);
     setAllContacts(all);
-    setContacts(all.filter((c) => ids.includes(c.id)));
+    setLinks(eventLinks);
+    const linkedIds = new Set(eventLinks.map((l) => l.contact_id));
+    setContacts(all.filter((c) => linkedIds.has(c.id)));
   }
 
-  function linkContact(id) {
-    const newIds = [...linkedIds, id];
-    localStorage.setItem(storageKey, newIds.join(","));
-    setLinkedIds(newIds);
-    setContacts(allContacts.filter((c) => newIds.includes(c.id)));
+  async function linkContact(contactId) {
+    await base44.entities.EventContact.create({ event_id: eventId, contact_id: contactId });
     setShowPicker(false);
+    loadContacts();
   }
 
-  function unlinkContact(id) {
-    const newIds = linkedIds.filter((i) => i !== id);
-    localStorage.setItem(storageKey, newIds.join(","));
-    setLinkedIds(newIds);
-    setContacts(allContacts.filter((c) => newIds.includes(c.id)));
+  async function unlinkContact(contactId) {
+    const link = links.find((l) => l.contact_id === contactId);
+    if (link) await base44.entities.EventContact.delete(link.id);
+    loadContacts();
   }
 
-  const unlinked = allContacts.filter((c) => !linkedIds.includes(c.id));
+  const linkedIds = new Set(links.map((l) => l.contact_id));
+  const unlinked = allContacts.filter((c) => !linkedIds.has(c.id));
 
   return (
     <div className="space-y-6">
