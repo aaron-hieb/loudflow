@@ -179,6 +179,9 @@ export default function CrewTab({ eventId, crew, onRefresh, isAdmin }) {
                             {m.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{m.phone}</span>}
                           </button>
                         )}
+                        {m.notes && (
+                          <p className="text-xs text-muted-foreground mt-1 bg-muted/50 rounded px-2 py-1">{m.notes}</p>
+                        )}
                       </div>
                     </div>
                     {isAdmin && (
