@@ -74,18 +74,7 @@
   "rls": {
     "create": null,
     "read": null,
-    "update": {
-      "$or": [
-        {
-          "created_by": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
-    },
+    "update": null,
     "delete": {
       "$or": [
         {
