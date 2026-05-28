@@ -66,14 +66,16 @@ export default function VenueTab({ eventId, isAdmin, startDate, endDate, city })
     load();
   }, [eventId]);
 
+  const weatherCity = city || venue?.city || form?.city;
+
   useEffect(() => {
-    if (!city || !startDate) return;
+    if (!weatherCity || !startDate) return;
     setWeatherLoading(true);
     setWeather(null);
-    fetchWeather(city, startDate, endDate || startDate)
+    fetchWeather(weatherCity, startDate, endDate || startDate)
       .then(setWeather)
       .finally(() => setWeatherLoading(false));
-  }, [city, startDate, endDate]);
+  }, [weatherCity, startDate, endDate]);
 
   async function load() {
     const results = await base44.entities.VenueInfo.filter({ event_id: eventId });
@@ -177,11 +179,11 @@ export default function VenueTab({ eventId, isAdmin, startDate, endDate, city })
     );
   }
 
-  const weatherCard = city && startDate ? (
+  const weatherCard = weatherCity && startDate ? (
     <div className="bg-card border border-border rounded-xl p-4">
       <div className="flex items-center gap-2 mb-3">
         <CloudSun className="h-4 w-4 text-primary" />
-        <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Weather Forecast — {city}</p>
+        <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Weather Forecast — {weatherCity}</p>
       </div>
       {weatherLoading ? (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
