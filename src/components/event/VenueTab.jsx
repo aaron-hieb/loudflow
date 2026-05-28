@@ -4,9 +4,54 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { MapPin, Phone, Mail, Clock, Car, Wifi, Users, Pencil } from "lucide-react";
+import { MapPin, Phone, Clock, Car, Wifi, Users, Pencil, CloudSun } from "lucide-react";
+import moment from "moment";
 
-export default function VenueTab({ eventId, isAdmin }) {
+const WMO_CODES = {
+  0: "Clear", 1: "Mainly Clear", 2: "Partly Cloudy", 3: "Overcast",
+  45: "Foggy", 48: "Icy Fog", 51: "Light Drizzle", 53: "Drizzle", 55: "Heavy Drizzle",
+  61: "Light Rain", 63: "Rain", 65: "Heavy Rain", 71: "Light Snow", 73: "Snow", 75: "Heavy Snow",
+  80: "Rain Showers", 81: "Showers", 82: "Heavy Showers", 95: "Thunderstorm", 99: "Hail Storm"
+};
+
+const WMO_EMOJI = {
+  0: "☀️", 1: "🌤", 2: "⛅", 3: "☁️", 45: "🌫", 48: "🌫",
+  51: "🌦", 53: "🌧", 55: "🌧", 61: "🌦", 63: "🌧", 65: "🌧",
+  71: "🌨", 73: "❄️", 75: "❄️", 80: "🌦", 81: "🌧", 82: "⛈", 95: "⛈", 99: "⛈"
+};
+
+async function fetchWeather(city, startDate, endDate) {
+  // Geocode city
+  const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&format=json`);
+  const geoData = await geoRes.json();
+  if (!geoData.results?.length) return null;
+  const { latitude, longitude } = geoData.results[0];
+
+  // Clamp dates to forecast window (Open-Meteo supports up to 16 days ahead)
+  const today = moment().format("YYYY-MM-DD");
+  const maxForecast = moment().add(16, "days").format("YYYY-MM-DD");
+  const start = startDate < today ? today : startDate;
+  const end = endDate > maxForecast ? maxForecast : endDate;
+  if (start > end) return null;
+
+  const wxRes = await fetch(
+    `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum&temperature_unit=fahrenheit&timezone=auto&start_date=${start}&end_date=${end}&forecast_days=16`
+  );
+  const wxData = await wxRes.json();
+  if (!wxData.daily?.time?.length) return null;
+
+  return wxData.daily.time.map((date, i) => ({
+    date,
+    code: wxData.daily.weathercode[i],
+    high: Math.round(wxData.daily.temperature_2m_max[i]),
+    low: Math.round(wxData.daily.temperature_2m_min[i]),
+    precip: wxData.daily.precipitation_sum[i],
+  }));
+}
+
+export default function VenueTab({ eventId, isAdmin, startDate, endDate, city }) {
+  const [weather, setWeather] = useState(null);
+  const [weatherLoading, setWeatherLoading] = useState(false);
   const [venue, setVenue] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -20,6 +65,15 @@ export default function VenueTab({ eventId, isAdmin }) {
   useEffect(() => {
     load();
   }, [eventId]);
+
+  useEffect(() => {
+    const weatherCity = city;
+    if (!weatherCity || !startDate) return;
+    setWeatherLoading(true);
+    fetchWeather(weatherCity, startDate, endDate || startDate)
+      .then(setWeather)
+      .finally(() => setWeatherLoading(false));
+  }, [city, startDate, endDate]);
 
   async function load() {
     const results = await base44.entities.VenueInfo.filter({ event_id: eventId });
@@ -230,6 +284,37 @@ export default function VenueTab({ eventId, isAdmin }) {
         <div className="bg-card border border-border rounded-xl p-4">
           <p className="text-xs text-muted-foreground mb-2">Notes</p>
           <p className="text-sm whitespace-pre-line">{venue.notes}</p>
+        </div>
+      )}
+
+      {/* Weather */}
+      {(weatherLoading || weather) && (
+        <div className="bg-card border border-border rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <CloudSun className="h-4 w-4 text-primary" />
+            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Weather Forecast</p>
+          </div>
+          {weatherLoading ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="w-4 h-4 border-2 border-muted border-t-primary rounded-full animate-spin" />
+              Loading forecast…
+            </div>
+          ) : weather?.length ? (
+            <div className="flex gap-3 overflow-x-auto pb-1">
+              {weather.map((day) => (
+                <div key={day.date} className="flex flex-col items-center gap-1 min-w-[60px] bg-muted/40 rounded-lg p-2">
+                  <p className="text-xs text-muted-foreground">{moment(day.date).format("ddd M/D")}</p>
+                  <span className="text-2xl">{WMO_EMOJI[day.code] ?? "🌡"}</span>
+                  <p className="text-xs font-medium">{day.high}°</p>
+                  <p className="text-xs text-muted-foreground">{day.low}°</p>
+                  <p className="text-xs text-muted-foreground">{WMO_CODES[day.code] ?? ""}</p>
+                  {day.precip > 0 && <p className="text-xs text-blue-500">💧{day.precip}"</p>}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">Forecast not available for these dates (only works within 16 days).</p>
+          )}
         </div>
       )}
     </div>

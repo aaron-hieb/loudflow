@@ -196,7 +196,7 @@ export default function EventDetail() {
           <CrewTab eventId={eventId} crew={crew} onRefresh={loadAll} isAdmin={isAdmin} />
         </TabsContent>
         <TabsContent value="venue" className="mt-6">
-          <VenueTab eventId={eventId} isAdmin={isAdmin} />
+          <VenueTab eventId={eventId} isAdmin={isAdmin} startDate={event.start_date} endDate={event.end_date} city={event.city} />
         </TabsContent>
         <TabsContent value="reimbursements" className="mt-6">
           <ReimbursementsTab eventId={eventId} isAdmin={isAdmin} />
