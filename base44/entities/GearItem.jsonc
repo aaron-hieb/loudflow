@@ -35,7 +35,8 @@
         "prepped",
         "packed",
         "unloaded",
-        "unpacked"
+        "unpacked",
+        "rented"
       ],
       "title": "Status"
     },

@@ -99,6 +99,7 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
                           <SelectItem value="packed">Packed</SelectItem>
                           <SelectItem value="unloaded">Unloaded</SelectItem>
                           <SelectItem value="unpacked">Unpacked</SelectItem>
+                          <SelectItem value="rented">Rented</SelectItem>
                         </SelectContent>
                       </Select>
                       {isAdmin && (
@@ -148,6 +149,7 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
                     <SelectItem value="packed">Packed</SelectItem>
                     <SelectItem value="unloaded">Unloaded</SelectItem>
                     <SelectItem value="unpacked">Unpacked</SelectItem>
+                    <SelectItem value="rented">Rented</SelectItem>
                     </SelectContent>
                 </Select>
               </div>
