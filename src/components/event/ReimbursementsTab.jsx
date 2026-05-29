@@ -197,7 +197,7 @@ export default function ReimbursementsTab({ eventId, isAdmin }) {
                           ) : (
                             <Square className="h-3.5 w-3.5" />
                           )}
-                          Expenses
+                          Add to Expenses
                         </button>
                       )}
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(item.id)}>
