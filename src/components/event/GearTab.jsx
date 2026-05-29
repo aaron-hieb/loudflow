@@ -99,16 +99,16 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
               </button>
               {!collapsed[cat] && <div className="space-y-2">
                 {catItems.map((item) => (
-                  <div key={item.id} className="bg-card border border-border rounded-lg p-4 flex items-center justify-between group">
-                    <div className="flex items-center gap-4">
-                      <span className="text-sm font-mono text-muted-foreground w-8">{item.quantity}x</span>
-                      <div>
-                        <p className="font-medium text-sm">{item.name}</p>
-                        {item.assigned_to && <p className="text-xs text-muted-foreground">{item.assigned_to}</p>}
+                  <div key={item.id} className="bg-card border border-border rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 group">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="text-sm font-mono text-muted-foreground w-8 shrink-0">{item.quantity}x</span>
+                      <div className="min-w-0">
+                        <p className="font-medium text-sm truncate">{item.name}</p>
+                        {item.assigned_to && <p className="text-xs text-muted-foreground truncate">{item.assigned_to}</p>}
                         {item.notes && <p className="text-xs text-muted-foreground italic mt-0.5">{item.notes}</p>}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 shrink-0">
                       <Select value={item.status} onValueChange={(v) => handleStatusChange(item.id, v)}>
                         <SelectTrigger className="h-7 w-28 text-xs"><SelectValue /></SelectTrigger>
                         <SelectContent>
