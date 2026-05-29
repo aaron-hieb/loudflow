@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Receipt, Plus, Loader2, ExternalLink, Trash2, Camera } from "lucide-react";
+import ReceiptScanner from "./ReceiptScanner";
 
 const statusStyles = {
   pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
@@ -25,6 +26,7 @@ export default function ReimbursementsTab({ eventId, isAdmin }) {
   const [form, setForm] = useState(defaultForm);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
 
   useEffect(() => { load(); }, [eventId]);
 
@@ -39,6 +41,14 @@ export default function ReimbursementsTab({ eventId, isAdmin }) {
     if (!file) return;
     setUploading(true);
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    setForm((f) => ({ ...f, receipt_url: file_url }));
+    setUploading(false);
+  }
+
+  async function handleScannedPdf(pdfFile) {
+    setShowScanner(false);
+    setUploading(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file: pdfFile });
     setForm((f) => ({ ...f, receipt_url: file_url }));
     setUploading(false);
   }
@@ -144,6 +154,10 @@ export default function ReimbursementsTab({ eventId, isAdmin }) {
         </div>
       )}
 
+      {showScanner && (
+        <ReceiptScanner onScanned={handleScannedPdf} onClose={() => setShowScanner(false)} />
+      )}
+
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -173,12 +187,15 @@ export default function ReimbursementsTab({ eventId, isAdmin }) {
                       <span className="text-xs text-muted-foreground text-center">Image or PDF</span>
                       <input type="file" accept="image/*,application/pdf" className="hidden" onChange={handleFileChange} />
                     </label>
-                    <label className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-lg p-4 cursor-pointer hover:border-primary transition-colors">
+                    <button
+                      type="button"
+                      onClick={() => setShowScanner(true)}
+                      className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-lg p-4 cursor-pointer hover:border-primary transition-colors w-full"
+                    >
                       <Camera className="h-6 w-6 text-muted-foreground mb-2" />
                       <span className="text-xs text-muted-foreground text-center">Scan receipt</span>
-                      <span className="text-xs text-muted-foreground text-center">Use camera</span>
-                      <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} />
-                    </label>
+                      <span className="text-xs text-muted-foreground text-center">Crop → PDF</span>
+                    </button>
                   </div>
                 )}
               </div>
