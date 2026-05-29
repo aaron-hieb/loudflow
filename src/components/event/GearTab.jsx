@@ -10,7 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 
 const categoryLabels = {
   audio: "Audio", lighting: "Lighting", video: "Video", staging: "Staging",
-  power: "Power", rigging: "Rigging", backline: "Backline", other: "Other",
+  power: "Power", power_cabling: "Power Cabling", data_cabling: "Data Cabling",
+  rigging: "Rigging", backline: "Backline", other: "Other",
 };
 
 const emptyGearForm = { name: "", category: "audio", quantity: 1, status: "in_shop", assigned_to: "", notes: "" };

@@ -18,6 +18,8 @@
         "video",
         "staging",
         "power",
+        "power_cabling",
+        "data_cabling",
         "rigging",
         "backline",
         "other"
