@@ -1,18 +1,140 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, RotateCw, Crop, Check } from "lucide-react";
 import { jsPDF } from "jspdf";
 
+const HANDLE_RADIUS = 14;
+
+// Auto-detect receipt bounds by sampling the image for the largest bright rectangular region
+function autoDetectBounds(img, canvasW, canvasH) {
+  // Use an offscreen canvas to sample pixels
+  const offscreen = document.createElement("canvas");
+  const sampleW = 200, sampleH = Math.round(200 * canvasH / canvasW);
+  offscreen.width = sampleW;
+  offscreen.height = sampleH;
+  const ctx = offscreen.getContext("2d");
+  ctx.drawImage(img, 0, 0, sampleW, sampleH);
+  const data = ctx.getImageData(0, 0, sampleW, sampleH).data;
+
+  // Build brightness map
+  const bright = new Uint8Array(sampleW * sampleH);
+  for (let i = 0; i < sampleW * sampleH; i++) {
+    const r = data[i * 4], g = data[i * 4 + 1], b = data[i * 4 + 2];
+    bright[i] = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+  }
+
+  // Find bounding box of pixels brighter than threshold (assumes receipt is lighter than background)
+  const threshold = 180;
+  let minX = sampleW, maxX = 0, minY = sampleH, maxY = 0;
+  for (let y = 0; y < sampleH; y++) {
+    for (let x = 0; x < sampleW; x++) {
+      if (bright[y * sampleW + x] > threshold) {
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+
+  // Fallback: 5% inset if detection fails or covers almost everything
+  const fW = maxX - minX, fH = maxY - minY;
+  const pad5W = sampleW * 0.05, pad5H = sampleH * 0.05;
+  if (fW < sampleW * 0.3 || fH < sampleH * 0.3 || fW > sampleW * 0.95) {
+    minX = pad5W; maxX = sampleW - pad5W;
+    minY = pad5H; maxY = sampleH - pad5H;
+  }
+
+  // Scale back to canvas dimensions
+  const scaleX = canvasW / sampleW, scaleY = canvasH / sampleH;
+  return {
+    tl: { x: minX * scaleX, y: minY * scaleY },
+    tr: { x: maxX * scaleX, y: minY * scaleY },
+    br: { x: maxX * scaleX, y: maxY * scaleY },
+    bl: { x: minX * scaleX, y: maxY * scaleY },
+  };
+}
+
+function drawOverlay(canvas, img, corners) {
+  if (!canvas || !img) return;
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+  // Dim outside polygon
+  ctx.save();
+  ctx.fillStyle = "rgba(0,0,0,0.5)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.globalCompositeOperation = "destination-out";
+  ctx.beginPath();
+  ctx.moveTo(corners.tl.x, corners.tl.y);
+  ctx.lineTo(corners.tr.x, corners.tr.y);
+  ctx.lineTo(corners.br.x, corners.br.y);
+  ctx.lineTo(corners.bl.x, corners.bl.y);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  // Redraw image inside polygon
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(corners.tl.x, corners.tl.y);
+  ctx.lineTo(corners.tr.x, corners.tr.y);
+  ctx.lineTo(corners.br.x, corners.br.y);
+  ctx.lineTo(corners.bl.x, corners.bl.y);
+  ctx.closePath();
+  ctx.clip();
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  ctx.restore();
+
+  // Draw border
+  ctx.strokeStyle = "#ff6b00";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(corners.tl.x, corners.tl.y);
+  ctx.lineTo(corners.tr.x, corners.tr.y);
+  ctx.lineTo(corners.br.x, corners.br.y);
+  ctx.lineTo(corners.bl.x, corners.bl.y);
+  ctx.closePath();
+  ctx.stroke();
+
+  // Draw corner handles
+  const handleKeys = ["tl", "tr", "br", "bl"];
+  handleKeys.forEach((key) => {
+    const c = corners[key];
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, HANDLE_RADIUS, 0, Math.PI * 2);
+    ctx.fillStyle = "#ff6b00";
+    ctx.fill();
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  });
+}
+
+function hitCorner(corners, x, y) {
+  const keys = ["tl", "tr", "br", "bl"];
+  for (const key of keys) {
+    const c = corners[key];
+    const dx = c.x - x, dy = c.y - y;
+    if (Math.sqrt(dx * dx + dy * dy) <= HANDLE_RADIUS * 1.5) return key;
+  }
+  return null;
+}
+
 export default function ReceiptScanner({ onScanned, onClose }) {
-  const [step, setStep] = useState("capture"); // capture | crop | processing
+  const [step, setStep] = useState("capture");
   const [imageSrc, setImageSrc] = useState(null);
-  const [cropStart, setCropStart] = useState(null);
-  const [cropRect, setCropRect] = useState(null);
-  const [dragging, setDragging] = useState(false);
+  const [corners, setCorners] = useState(null);
+  const [draggingCorner, setDraggingCorner] = useState(null);
   const canvasRef = useRef(null);
   const imgRef = useRef(null);
   const fileInputRef = useRef(null);
+  const cornersRef = useRef(null);
+
+  // Keep ref in sync for event handlers
+  useEffect(() => { cornersRef.current = corners; }, [corners]);
 
   function handleFileCapture(e) {
     const file = e.target.files[0];
@@ -21,12 +143,35 @@ export default function ReceiptScanner({ onScanned, onClose }) {
     reader.onload = (ev) => {
       setImageSrc(ev.target.result);
       setStep("crop");
-      setCropRect(null);
+      setCorners(null);
     };
     reader.readAsDataURL(file);
   }
 
-  function getRelativePos(e, canvas) {
+  function handleImgLoad() {
+    const canvas = canvasRef.current;
+    const img = imgRef.current;
+    if (!canvas || !img) return;
+    const maxW = Math.min(img.naturalWidth, 800);
+    const scale = maxW / img.naturalWidth;
+    canvas.width = maxW;
+    canvas.height = img.naturalHeight * scale;
+
+    const detected = autoDetectBounds(img, canvas.width, canvas.height);
+    setCorners(detected);
+    cornersRef.current = detected;
+    drawOverlay(canvas, img, detected);
+  }
+
+  // Redraw whenever corners change
+  useEffect(() => {
+    if (corners && canvasRef.current && imgRef.current) {
+      drawOverlay(canvasRef.current, imgRef.current, corners);
+    }
+  }, [corners]);
+
+  function getPos(e) {
+    const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -36,103 +181,61 @@ export default function ReceiptScanner({ onScanned, onClose }) {
     };
   }
 
-  const onMouseDown = useCallback((e) => {
+  const onPointerDown = useCallback((e) => {
     e.preventDefault();
-    const pos = getRelativePos(e, canvasRef.current);
-    setCropStart(pos);
-    setCropRect(null);
-    setDragging(true);
+    if (!cornersRef.current) return;
+    const pos = getPos(e);
+    const hit = hitCorner(cornersRef.current, pos.x, pos.y);
+    if (hit) setDraggingCorner(hit);
   }, []);
 
-  const onMouseMove = useCallback((e) => {
-    if (!dragging || !cropStart) return;
+  const onPointerMove = useCallback((e) => {
     e.preventDefault();
-    const pos = getRelativePos(e, canvasRef.current);
-    setCropRect({
-      x: Math.min(cropStart.x, pos.x),
-      y: Math.min(cropStart.y, pos.y),
-      w: Math.abs(pos.x - cropStart.x),
-      h: Math.abs(pos.y - cropStart.y),
-    });
-  }, [dragging, cropStart]);
+    if (!draggingCorner || !cornersRef.current) return;
+    const pos = getPos(e);
+    const updated = { ...cornersRef.current, [draggingCorner]: pos };
+    setCorners(updated);
+  }, [draggingCorner]);
 
-  const onMouseUp = useCallback((e) => {
+  const onPointerUp = useCallback((e) => {
     e.preventDefault();
-    setDragging(false);
+    setDraggingCorner(null);
   }, []);
-
-  function drawCanvas() {
-    const canvas = canvasRef.current;
-    if (!canvas || !imgRef.current) return;
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(imgRef.current, 0, 0, canvas.width, canvas.height);
-    if (cropRect && cropRect.w > 5 && cropRect.h > 5) {
-      // dim outside crop
-      ctx.fillStyle = "rgba(0,0,0,0.45)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.clearRect(cropRect.x, cropRect.y, cropRect.w, cropRect.h);
-      ctx.drawImage(imgRef.current, cropRect.x, cropRect.y, cropRect.w, cropRect.h, cropRect.x, cropRect.y, cropRect.w, cropRect.h);
-      // border
-      ctx.strokeStyle = "#ff6b00";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(cropRect.x, cropRect.y, cropRect.w, cropRect.h);
-    }
-  }
-
-  function handleImgLoad() {
-    const canvas = canvasRef.current;
-    if (!canvas || !imgRef.current) return;
-    const maxW = Math.min(imgRef.current.naturalWidth, 800);
-    const scale = maxW / imgRef.current.naturalWidth;
-    canvas.width = maxW;
-    canvas.height = imgRef.current.naturalHeight * scale;
-    drawCanvas();
-  }
-
-  // re-draw whenever cropRect changes
-  useCallback(() => { drawCanvas(); }, [cropRect]);
 
   async function handleConfirmCrop() {
     setStep("processing");
     const canvas = canvasRef.current;
     const img = imgRef.current;
+    const c = cornersRef.current;
 
-    // Build a temp canvas with just the cropped region (or full image if no crop)
+    // Bounding box of the four corners (for simple rect crop)
+    const scaleX = img.naturalWidth / canvas.width;
+    const scaleY = img.naturalHeight / canvas.height;
+
+    const xs = [c.tl.x, c.tr.x, c.br.x, c.bl.x];
+    const ys = [c.tl.y, c.tr.y, c.br.y, c.bl.y];
+    const minX = Math.min(...xs) * scaleX;
+    const minY = Math.min(...ys) * scaleY;
+    const maxX = Math.max(...xs) * scaleX;
+    const maxY = Math.max(...ys) * scaleY;
+    const sw = maxX - minX, sh = maxY - minY;
+
     const srcCanvas = document.createElement("canvas");
-    const srcCtx = srcCanvas.getContext("2d");
-
-    let sx, sy, sw, sh;
-    if (cropRect && cropRect.w > 10 && cropRect.h > 10) {
-      const scaleX = img.naturalWidth / canvas.width;
-      const scaleY = img.naturalHeight / canvas.height;
-      sx = cropRect.x * scaleX;
-      sy = cropRect.y * scaleY;
-      sw = cropRect.w * scaleX;
-      sh = cropRect.h * scaleY;
-    } else {
-      sx = 0; sy = 0; sw = img.naturalWidth; sh = img.naturalHeight;
-    }
-
     srcCanvas.width = sw;
     srcCanvas.height = sh;
-    srcCtx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
+    srcCanvas.getContext("2d").drawImage(img, minX, minY, sw, sh, 0, 0, sw, sh);
 
     const dataUrl = srcCanvas.toDataURL("image/jpeg", 0.92);
-
-    // Convert to PDF
     const orientation = sw > sh ? "landscape" : "portrait";
     const pdf = new jsPDF({ orientation, unit: "px", format: [sw, sh] });
     pdf.addImage(dataUrl, "JPEG", 0, 0, sw, sh);
-    const pdfBlob = pdf.output("blob");
-    const pdfFile = new File([pdfBlob], "receipt.pdf", { type: "application/pdf" });
-
+    const pdfFile = new File([pdf.output("blob")], "receipt.pdf", { type: "application/pdf" });
     onScanned(pdfFile);
   }
 
   function retake() {
     setImageSrc(null);
-    setCropRect(null);
+    setCorners(null);
     setStep("capture");
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
@@ -143,7 +246,7 @@ export default function ReceiptScanner({ onScanned, onClose }) {
         <DialogHeader>
           <DialogTitle>
             {step === "capture" && "Scan Receipt"}
-            {step === "crop" && "Crop Receipt"}
+            {step === "crop" && "Adjust Receipt Corners"}
             {step === "processing" && "Processing..."}
           </DialogTitle>
         </DialogHeader>
@@ -167,7 +270,9 @@ export default function ReceiptScanner({ onScanned, onClose }) {
 
         {step === "crop" && imageSrc && (
           <div className="space-y-3">
-            <p className="text-xs text-muted-foreground">Drag to select the receipt area, then confirm. Skip to use full image.</p>
+            <p className="text-xs text-muted-foreground">
+              The receipt area was auto-detected. Drag the <span className="text-primary font-medium">orange corner handles</span> to adjust if needed.
+            </p>
             <div className="relative overflow-auto border rounded-lg bg-muted">
               <img
                 ref={imgRef}
@@ -179,27 +284,22 @@ export default function ReceiptScanner({ onScanned, onClose }) {
               <canvas
                 ref={canvasRef}
                 className="touch-none w-full"
-                style={{ cursor: "crosshair", display: "block" }}
-                onMouseDown={onMouseDown}
-                onMouseMove={(e) => { onMouseMove(e); drawCanvas(); }}
-                onMouseUp={onMouseUp}
-                onTouchStart={onMouseDown}
-                onTouchMove={(e) => { onMouseMove(e); drawCanvas(); }}
-                onTouchEnd={onMouseUp}
+                style={{ cursor: draggingCorner ? "grabbing" : "default", display: "block" }}
+                onMouseDown={onPointerDown}
+                onMouseMove={onPointerMove}
+                onMouseUp={onPointerUp}
+                onTouchStart={onPointerDown}
+                onTouchMove={onPointerMove}
+                onTouchEnd={onPointerUp}
               />
             </div>
             <div className="flex justify-between gap-2">
               <Button variant="outline" size="sm" onClick={retake} className="gap-1.5">
                 <RotateCw className="h-3.5 w-3.5" /> Retake
               </Button>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => { setCropRect(null); handleConfirmCrop(); }} className="gap-1.5">
-                  <Crop className="h-3.5 w-3.5" /> Use Full Image
-                </Button>
-                <Button size="sm" onClick={handleConfirmCrop} disabled={!cropRect || cropRect.w < 10} className="gap-1.5">
-                  <Check className="h-3.5 w-3.5" /> Confirm Crop
-                </Button>
-              </div>
+              <Button size="sm" onClick={handleConfirmCrop} disabled={!corners} className="gap-1.5">
+                <Check className="h-3.5 w-3.5" /> Confirm & Save
+              </Button>
             </div>
           </div>
         )}
