@@ -152,20 +152,12 @@ export default function ScheduleTab({ eventId, items, onRefresh, isAdmin, city }
         </div>
       ) : (
         <div className="space-y-6">
-          {/* Upcoming / current days */}
-          {sortedDays.length === 0 && (
-            <div className="text-center py-6 text-muted-foreground text-sm">No upcoming schedule items</div>
-          )}
-          {sortedDays.map((day) => (
-            <DayGroup key={day} day={day} items={grouped[day]} isAdmin={isAdmin} onEdit={openEdit} onDelete={handleDelete} />
-          ))}
-
           {/* Past items collapsible */}
           {pastSortedDays.length > 0 && (
             <div>
               <button
                 onClick={() => setShowPast((p) => !p)}
-                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full py-2 border-t border-border"
+                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full py-2 border-b border-border"
               >
                 {showPast ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                 <span className="font-medium">Past Items ({pastItems.length})</span>
@@ -179,6 +171,14 @@ export default function ScheduleTab({ eventId, items, onRefresh, isAdmin, city }
               )}
             </div>
           )}
+
+          {/* Upcoming / current days */}
+          {sortedDays.length === 0 && (
+            <div className="text-center py-6 text-muted-foreground text-sm">No upcoming schedule items</div>
+          )}
+          {sortedDays.map((day) => (
+            <DayGroup key={day} day={day} items={grouped[day]} isAdmin={isAdmin} onEdit={openEdit} onDelete={handleDelete} />
+          ))}
         </div>
       )}
 
