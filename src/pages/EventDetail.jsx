@@ -130,7 +130,7 @@ export default function EventDetail() {
                   {event.venue}{event.city ? `, ${event.city}` : ""}
                 </span>
               )}
-              {event.budget && (
+              {isAdmin && event.budget && (
                 <span className="flex items-center gap-1">
                   <DollarSign className="h-3.5 w-3.5" />
                   {event.budget.toLocaleString()}
@@ -256,10 +256,12 @@ export default function EventDetail() {
                 <Label>End Date</Label>
                 <Input type="date" value={editForm.end_date} onChange={(e) => setEditForm({ ...editForm, end_date: e.target.value })} />
               </div>
+              {isAdmin && (
               <div>
                 <Label>Budget</Label>
                 <Input type="number" value={editForm.budget} onChange={(e) => setEditForm({ ...editForm, budget: e.target.value })} />
               </div>
+              )}
               <div className="col-span-2">
                 <Label>Notes</Label>
                 <Textarea value={editForm.notes} onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })} />
