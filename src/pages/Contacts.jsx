@@ -160,6 +160,9 @@ export default function Contacts() {
                   <Phone className="h-3.5 w-3.5" /> {c.phone}
                 </a>
               )}
+              {c.notes && (
+                <p className="text-xs text-muted-foreground mt-2 bg-muted/50 rounded px-2 py-1.5 leading-relaxed">{c.notes}</p>
+              )}
             </div>
           ))}
         </div>
