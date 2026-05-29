@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Package, Trash2, Pencil } from "lucide-react";
+import { Plus, Package, Trash2, Pencil, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -52,6 +52,12 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
     onRefresh();
   }
 
+  const [collapsed, setCollapsed] = useState({});
+
+  function toggleCategory(cat) {
+    setCollapsed((prev) => ({ ...prev, [cat]: !prev[cat] }));
+  }
+
   const grouped = {};
   items.forEach((item) => {
     const cat = item.category || "other";
@@ -79,8 +85,19 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
         <div className="space-y-6">
           {Object.entries(grouped).map(([cat, catItems]) => (
             <div key={cat}>
-              <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wider">{categoryLabels[cat] || cat}</h4>
-              <div className="space-y-2">
+              <button
+                onClick={() => toggleCategory(cat)}
+                className="flex items-center gap-2 w-full text-left mb-3 group/cat"
+              >
+                {collapsed[cat] ? (
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                )}
+                <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">{categoryLabels[cat] || cat}</h4>
+                <span className="text-xs text-muted-foreground/60">({catItems.length})</span>
+              </button>
+              {!collapsed[cat] && <div className="space-y-2">
                 {catItems.map((item) => (
                   <div key={item.id} className="bg-card border border-border rounded-lg p-4 flex items-center justify-between group">
                     <div className="flex items-center gap-4">
@@ -112,7 +129,7 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
                     </div>
                   </div>
                 ))}
-              </div>
+              </div>}
             </div>
           ))}
         </div>
