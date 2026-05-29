@@ -11,19 +11,27 @@ import moment from "moment";
 import { cn } from "@/lib/utils";
 
 const typeColors = {
+  travel: "border-l-sky-500",
+  meeting: "border-l-emerald-500",
+  meal: "border-l-orange-400",
   load_in: "border-l-blue-500",
-  rehearsal: "border-l-violet-500",
   sound_check: "border-l-amber-500",
+  doors: "border-l-violet-500",
   show: "border-l-primary",
   load_out: "border-l-slate-500",
-  meeting: "border-l-emerald-500",
-  travel: "border-l-sky-500",
   other: "border-l-muted-foreground",
 };
 
 const typeLabels = {
-  load_in: "Load In", rehearsal: "Rehearsal", sound_check: "Sound Check",
-  show: "Show", load_out: "Load Out", meeting: "Meeting", travel: "Travel", other: "Other",
+  travel: "Travel",
+  meeting: "Meeting",
+  meal: "Meal",
+  load_in: "Load In",
+  sound_check: "Soundcheck",
+  doors: "Doors",
+  show: "Show",
+  load_out: "Load Out",
+  other: "Other",
 };
 
 const emptyForm = { title: "", date: "", start_time: "", end_time: "", location: "", assigned_to: "", type: "other", notes: "" };

@@ -34,13 +34,14 @@
     "type": {
       "type": "string",
       "enum": [
+        "travel",
+        "meeting",
+        "meal",
         "load_in",
-        "rehearsal",
         "sound_check",
+        "doors",
         "show",
         "load_out",
-        "meeting",
-        "travel",
         "other"
       ],
       "title": "Type"
