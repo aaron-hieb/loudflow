@@ -31,7 +31,7 @@ export default function Layout() {
   }, [dark]);
 
   return (
-    <div className="min-h-screen flex bg-background overflow-x-hidden">
+    <div className="min-h-screen flex bg-background">
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex w-64 flex-col border-r border-border bg-card fixed inset-y-0 left-0 z-30">
         <div className="p-6 border-b border-border">
@@ -171,8 +171,8 @@ export default function Layout() {
       }
 
       {/* Main Content */}
-      <main className="flex-1 md:ml-64 pt-14 md:pt-0 overflow-x-hidden min-w-0">
-        <div className="p-4 md:p-8 max-w-7xl mx-auto overflow-x-hidden">
+      <main className="flex-1 md:ml-64 pt-14 md:pt-0">
+        <div className="p-4 md:p-8 max-w-7xl mx-auto">
           <Outlet />
         </div>
       </main>
