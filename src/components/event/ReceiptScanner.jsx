@@ -128,7 +128,9 @@ export default function ReceiptScanner({ onScanned, onClose }) {
   const [imageSrc, setImageSrc] = useState(null);
   const [corners, setCorners] = useState(null);
   const [draggingCorner, setDraggingCorner] = useState(null);
+  const [magnifier, setMagnifier] = useState(null); // { x, y, canvasX, canvasY }
   const canvasRef = useRef(null);
+  const magnifierCanvasRef = useRef(null);
   const imgRef = useRef(null);
   const fileInputRef = useRef(null);
   const cornersRef = useRef(null);
@@ -195,11 +197,45 @@ export default function ReceiptScanner({ onScanned, onClose }) {
     const pos = getPos(e);
     const updated = { ...cornersRef.current, [draggingCorner]: pos };
     setCorners(updated);
+
+    // Update magnifier position (in screen coords)
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    setMagnifier({ screenX: clientX - rect.left, screenY: clientY - rect.top, canvasX: pos.x, canvasY: pos.y });
+
+    // Draw magnifier
+    const mag = magnifierCanvasRef.current;
+    const img = imgRef.current;
+    if (mag && img) {
+      const ZOOM = 3, SIZE = 100;
+      mag.width = SIZE; mag.height = SIZE;
+      const mCtx = mag.getContext("2d");
+      mCtx.clearRect(0, 0, SIZE, SIZE);
+      // Circular clip
+      mCtx.beginPath();
+      mCtx.arc(SIZE / 2, SIZE / 2, SIZE / 2, 0, Math.PI * 2);
+      mCtx.clip();
+      const scaleX = img.naturalWidth / canvas.width;
+      const scaleY = img.naturalHeight / canvas.height;
+      const sx = (pos.x - SIZE / (2 * ZOOM)) * scaleX;
+      const sy = (pos.y - SIZE / (2 * ZOOM)) * scaleY;
+      const sw = (SIZE / ZOOM) * scaleX;
+      const sh = (SIZE / ZOOM) * scaleY;
+      mCtx.drawImage(img, sx, sy, sw, sh, 0, 0, SIZE, SIZE);
+      // Crosshair
+      mCtx.strokeStyle = "#ff6b00";
+      mCtx.lineWidth = 1.5;
+      mCtx.beginPath(); mCtx.moveTo(SIZE / 2, 0); mCtx.lineTo(SIZE / 2, SIZE); mCtx.stroke();
+      mCtx.beginPath(); mCtx.moveTo(0, SIZE / 2); mCtx.lineTo(SIZE, SIZE / 2); mCtx.stroke();
+    }
   }, [draggingCorner]);
 
   const onPointerUp = useCallback((e) => {
     e.preventDefault();
     setDraggingCorner(null);
+    setMagnifier(null);
   }, []);
 
   async function handleConfirmCrop() {
@@ -292,6 +328,22 @@ export default function ReceiptScanner({ onScanned, onClose }) {
                 onTouchMove={onPointerMove}
                 onTouchEnd={onPointerUp}
               />
+              <div
+                className="pointer-events-none absolute z-10 transition-opacity duration-150"
+                style={{
+                  left: magnifier ? magnifier.screenX + 20 : 0,
+                  top: magnifier ? Math.max(0, magnifier.screenY - 120) : 0,
+                  opacity: magnifier ? 1 : 0,
+                }}
+              >
+                <canvas
+                  ref={magnifierCanvasRef}
+                  width={100}
+                  height={100}
+                  className="rounded-full border-2 border-primary shadow-lg bg-white"
+                  style={{ display: "block" }}
+                />
+              </div>
             </div>
             <div className="flex justify-between gap-2">
               <Button variant="outline" size="sm" onClick={retake} className="gap-1.5">
