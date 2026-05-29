@@ -25,6 +25,7 @@ import CrewTab from "../components/event/CrewTab";
 import VenueTab from "../components/event/VenueTab";
 import ReimbursementsTab from "../components/event/ReimbursementsTab";
 import ExpensesTab from "../components/event/ExpensesTab";
+import ChatTab from "../components/event/ChatTab";
 import moment from "moment";
 
 export default function EventDetail() {
@@ -178,6 +179,7 @@ export default function EventDetail() {
           <TabsTrigger value="reimbursements">Reimbursements</TabsTrigger>
           <TabsTrigger value="files">Files</TabsTrigger>
           {isAdmin && <TabsTrigger value="expenses">Expenses</TabsTrigger>}
+          <TabsTrigger value="chat">Chat</TabsTrigger>
         </TabsList>
         <TabsContent value="schedule" className="mt-6">
           <ScheduleTab eventId={eventId} items={scheduleItems} onRefresh={loadAll} isAdmin={isAdmin} city={event.city} />
@@ -211,6 +213,9 @@ export default function EventDetail() {
             <ExpensesTab eventId={eventId} budget={event.budget} />
           </TabsContent>
         )}
+        <TabsContent value="chat" className="mt-6">
+          <ChatTab eventId={eventId} user={user} />
+        </TabsContent>
       </Tabs>
 
       {/* Edit Dialog */}

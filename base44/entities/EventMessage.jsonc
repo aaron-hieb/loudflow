@@ -1,0 +1,28 @@
+{
+  "name": "EventMessage",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "title": "Event ID"
+    },
+    "text": {
+      "type": "string",
+      "title": "Message"
+    },
+    "sender_name": {
+      "type": "string",
+      "title": "Sender Name"
+    },
+    "sender_email": {
+      "type": "string",
+      "title": "Sender Email"
+    }
+  },
+  "required": [
+    "event_id",
+    "text",
+    "sender_name",
+    "sender_email"
+  ]
+}
