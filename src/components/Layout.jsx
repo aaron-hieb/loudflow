@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, FolderOpen, Menu, X, Zap, Sun, Moon } from "lucide-react";
+import { LayoutDashboard, Users, FolderOpen, Menu, X, Zap, Sun, Moon, BarChart2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/AuthContext";
@@ -9,6 +9,9 @@ const navItems = [
 { path: "/", label: "Dashboard", icon: LayoutDashboard },
 { path: "/events", label: "Events", icon: FolderOpen },
 { path: "/contacts", label: "Contacts", icon: Users }];
+
+const adminNavItems = [
+{ path: "/monthly-expenses", label: "Monthly Expenses", icon: BarChart2 }];
 
 
 export default function Layout() {
@@ -52,12 +55,33 @@ export default function Layout() {
                   "bg-primary text-primary-foreground shadow-sm" :
                   "text-muted-foreground hover:text-foreground hover:bg-muted"
                 )}>
-                
                 <Icon className="h-4 w-4" />
                 {item.label}
               </Link>);
-
           })}
+          {user?.role === "admin" && (
+            <>
+              <p className="text-xs text-muted-foreground font-medium px-3 pt-4 pb-1 uppercase tracking-wider">Admin</p>
+              {adminNavItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = location.pathname === item.path;
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+                      isActive ?
+                      "bg-primary text-primary-foreground shadow-sm" :
+                      "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    )}>
+                    <Icon className="h-4 w-4" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </>
+          )}
         </nav>
         <div className="p-4 border-t border-border">
           {user?.role === "admin" && (
@@ -117,11 +141,28 @@ export default function Layout() {
                   "bg-primary text-primary-foreground" :
                   "text-muted-foreground hover:text-foreground hover:bg-muted"
                 )}>
-                
-                  <Icon className="h-4 w-4" />
-                  {item.label}
-                </Link>);
-
+                <Icon className="h-4 w-4" />
+                {item.label}
+              </Link>);
+          })}
+          {user?.role === "admin" && adminNavItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={() => setMobileOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
+                  isActive ?
+                  "bg-primary text-primary-foreground" :
+                  "text-muted-foreground hover:text-foreground hover:bg-muted"
+                )}>
+                <Icon className="h-4 w-4" />
+                {item.label}
+              </Link>
+            );
           })}
           </div>
         </div>

@@ -12,6 +12,7 @@ import Dashboard from './pages/Dashboard';
 import Events from './pages/Events';
 import EventDetail from './pages/EventDetail';
 import Contacts from './pages/Contacts';
+import MonthlyExpenses from './pages/MonthlyExpenses';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
@@ -95,6 +96,7 @@ const AuthenticatedApp = () => {
           <Route path="/events" element={<Events />} />
           <Route path="/events/:eventId" element={<EventDetail />} />
           <Route path="/contacts" element={<Contacts />} />
+          <Route path="/monthly-expenses" element={<MonthlyExpenses />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
