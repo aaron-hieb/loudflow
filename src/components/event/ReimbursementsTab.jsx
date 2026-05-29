@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Receipt, Plus, Loader2, ExternalLink, Trash2, Camera } from "lucide-react";
+import { Receipt, Plus, Loader2, ExternalLink, Trash2, Camera, Download } from "lucide-react";
 import ReceiptScanner from "./ReceiptScanner";
 
 const statusStyles = {
@@ -124,11 +124,20 @@ export default function ReimbursementsTab({ eventId, isAdmin }) {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {item.receipt_url && (
-                    <a href={item.receipt_url} target="_blank" rel="noopener noreferrer">
-                      <Button variant="outline" size="sm" className="gap-1.5 text-xs">
-                        <ExternalLink className="h-3 w-3" /> Receipt
-                      </Button>
-                    </a>
+                    <>
+                      <a href={item.receipt_url} target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline" size="sm" className="gap-1.5 text-xs">
+                          <ExternalLink className="h-3 w-3" /> View
+                        </Button>
+                      </a>
+                      {isAdmin && (
+                        <a href={item.receipt_url} download>
+                          <Button variant="outline" size="sm" className="gap-1.5 text-xs">
+                            <Download className="h-3 w-3" /> Download
+                          </Button>
+                        </a>
+                      )}
+                    </>
                   )}
                   {isAdmin && (
                     <>
