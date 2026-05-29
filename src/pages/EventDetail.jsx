@@ -189,7 +189,7 @@ export default function EventDetail() {
           <HotelTab eventId={eventId} hotels={hotels} onRefresh={loadAll} isAdmin={isAdmin} />
         </TabsContent>
         <TabsContent value="gear" className="mt-6">
-          <GearTab eventId={eventId} items={gearItems} onRefresh={loadAll} isAdmin={isAdmin} />
+          <GearTab eventId={eventId} items={gearItems} onRefresh={loadAll} isAdmin={isAdmin} city={event.city} />
         </TabsContent>
         <TabsContent value="contacts" className="mt-6">
           <EventContactsTab eventId={eventId} isAdmin={isAdmin} />
