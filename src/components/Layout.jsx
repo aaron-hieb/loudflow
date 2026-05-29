@@ -39,7 +39,7 @@ export default function Layout() {
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
               <Zap className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg tracking-tight">LOUDFLOW</span>
+            <span className="font-bold text-lg tracking-tight">FLOWDADDY</span>
           </Link>
         </div>
         <nav className="flex-1 p-4 space-y-1">
@@ -61,36 +61,36 @@ export default function Layout() {
                 {item.label}
               </Link>);
           })}
-          {user?.role === "admin" && (
-            <>
+          {user?.role === "admin" &&
+          <>
               <p className="text-xs text-muted-foreground font-medium px-3 pt-4 pb-1 uppercase tracking-wider">Admin</p>
               {adminNavItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.path;
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
-                      isActive ?
-                      "bg-primary text-primary-foreground shadow-sm" :
-                      "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    )}>
+              const Icon = item.icon;
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+                    isActive ?
+                    "bg-primary text-primary-foreground shadow-sm" :
+                    "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}>
                     <Icon className="h-4 w-4" />
                     {item.label}
-                  </Link>
-                );
-              })}
+                  </Link>);
+
+            })}
             </>
-          )}
+          }
         </nav>
         <div className="p-4 border-t border-border">
-          {user?.role === "admin" && (
-            <div className="mb-2 px-1">
+          {user?.role === "admin" &&
+          <div className="mb-2 px-1">
               <AdminUserApprovalPanel />
             </div>
-          )}
+          }
           <button onClick={() => setDark(!dark)} className="flex items-center gap-2 px-3 py-2 w-full text-sm text-muted-foreground hover:text-foreground transition-colors mb-1">
             {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             {dark ? "Light mode" : "Dark mode"}
@@ -163,8 +163,8 @@ export default function Layout() {
                 )}>
                 <Icon className="h-4 w-4" />
                 {item.label}
-              </Link>
-            );
+              </Link>);
+
           })}
           </div>
         </div>
