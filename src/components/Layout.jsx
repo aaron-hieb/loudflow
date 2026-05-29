@@ -171,8 +171,8 @@ export default function Layout() {
       }
 
       {/* Main Content */}
-      <main className="flex-1 md:ml-64 pt-14 md:pt-0 overflow-x-hidden">
-        <div className="p-4 md:p-8 max-w-7xl mx-auto overflow-x-hidden">
+      <main className="flex-1 md:ml-64 pt-14 md:pt-0">
+        <div className="p-4 md:p-8 max-w-7xl mx-auto">
           <Outlet />
         </div>
       </main>
