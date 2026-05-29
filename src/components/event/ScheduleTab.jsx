@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 import moment from "moment";
 import { cn } from "@/lib/utils";
+import WindLightningWidget from "./WindLightningWidget";
 
 const typeColors = {
   travel: "border-l-sky-500",
@@ -41,7 +42,7 @@ function formatTime(t) {
   return moment(t, "HH:mm").format("h:mm A");
 }
 
-export default function ScheduleTab({ eventId, items, onRefresh, isAdmin }) {
+export default function ScheduleTab({ eventId, items, onRefresh, isAdmin, city }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
@@ -83,6 +84,7 @@ export default function ScheduleTab({ eventId, items, onRefresh, isAdmin }) {
 
   return (
     <div className="space-y-6">
+      {city && <WindLightningWidget city={city} />}
       <div className="flex justify-between items-center">
         <h3 className="font-semibold">Schedule</h3>
         {isAdmin && (

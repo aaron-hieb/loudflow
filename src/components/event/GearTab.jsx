@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Plus, Package, Trash2, Pencil, ChevronDown, ChevronRight } from "lucide-react";
-import WindLightningWidget from "./WindLightningWidget";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,7 +17,7 @@ const categoryLabels = {
 
 const emptyGearForm = { name: "", category: "audio", quantity: 1, status: "in_shop", assigned_to: "", notes: "" };
 
-export default function GearTab({ eventId, items, onRefresh, isAdmin, city }) {
+export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyGearForm);
   const [editId, setEditId] = useState(null);
@@ -68,8 +68,7 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin, city }) {
 
   return (
     <div className="space-y-6">
-      {city && <WindLightningWidget city={city} />}
-      <div className="flex justify-between items-center">
+<div className="flex justify-between items-center">
         <h3 className="font-semibold">Gear &amp; Equipment</h3>
         {isAdmin && (
         <Button size="sm" onClick={openAdd} className="gap-1.5">

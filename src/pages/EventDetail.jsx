@@ -180,7 +180,7 @@ export default function EventDetail() {
           {isAdmin && <TabsTrigger value="expenses">Expenses</TabsTrigger>}
         </TabsList>
         <TabsContent value="schedule" className="mt-6">
-          <ScheduleTab eventId={eventId} items={scheduleItems} onRefresh={loadAll} isAdmin={isAdmin} />
+          <ScheduleTab eventId={eventId} items={scheduleItems} onRefresh={loadAll} isAdmin={isAdmin} city={event.city} />
         </TabsContent>
         <TabsContent value="travel" className="mt-6">
           <TravelTab eventId={eventId} flights={flights} onRefresh={loadAll} isAdmin={isAdmin} />
@@ -189,7 +189,7 @@ export default function EventDetail() {
           <HotelTab eventId={eventId} hotels={hotels} onRefresh={loadAll} isAdmin={isAdmin} />
         </TabsContent>
         <TabsContent value="gear" className="mt-6">
-          <GearTab eventId={eventId} items={gearItems} onRefresh={loadAll} isAdmin={isAdmin} city={event.city} />
+          <GearTab eventId={eventId} items={gearItems} onRefresh={loadAll} isAdmin={isAdmin} />
         </TabsContent>
         <TabsContent value="contacts" className="mt-6">
           <EventContactsTab eventId={eventId} isAdmin={isAdmin} />
