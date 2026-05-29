@@ -59,7 +59,7 @@ export default function EventDetail() {
     ]);
     setEvent(evt);
     setScheduleItems(schedule);
-    setFlights(fl);
+    setFlights([...fl].sort((a, b) => new Date(a.departure_date) - new Date(b.departure_date)));
     setHotels(ht);
     setGearItems(gear);
     setEventFiles(files);
