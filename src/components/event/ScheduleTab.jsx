@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Clock, MapPin, Trash2, Pencil } from "lucide-react";
+import { Plus, Clock, MapPin, Trash2, Pencil, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,11 +42,50 @@ function formatTime(t) {
   return moment(t, "HH:mm").format("h:mm A");
 }
 
+function DayGroup({ day, items, isAdmin, onEdit, onDelete }) {
+  return (
+    <div>
+      <h4 className="text-sm font-medium text-muted-foreground mb-3">
+        {day === "Unscheduled" ? day : moment(day).format("ddd, MMM D, YYYY")}
+      </h4>
+      <div className="space-y-2">
+        {items.map((item) => (
+          <div key={item.id} className={cn("bg-card border border-border rounded-lg p-4 border-l-4 flex items-start justify-between group", typeColors[item.type] || "border-l-muted-foreground")}>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{typeLabels[item.type] || item.type}</span>
+                {item.start_time && (
+                  <span className="text-xs text-muted-foreground">
+                    {formatTime(item.start_time)}{item.end_time ? ` – ${formatTime(item.end_time)}` : ""}
+                  </span>
+                )}
+              </div>
+              <p className="font-medium text-sm">{item.title}</p>
+              <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
+                {item.location && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{item.location}</span>}
+                {item.assigned_to && <span>{item.assigned_to}</span>}
+              </div>
+              {item.notes && <p className="mt-1.5 text-xs text-muted-foreground italic">{item.notes}</p>}
+            </div>
+            {isAdmin && (
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onClick={() => onEdit(item)} className="p-1 hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
+                <button onClick={() => onDelete(item.id)} className="p-1 hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function ScheduleTab({ eventId, items, onRefresh, isAdmin, city }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [showPast, setShowPast] = useState(false);
 
   function openAdd() { setForm(emptyForm); setEditId(null); setShowForm(true); }
   function openEdit(item) {
@@ -72,15 +111,27 @@ export default function ScheduleTab({ eventId, items, onRefresh, isAdmin, city }
     onRefresh();
   }
 
-  const grouped = {};
-  items.forEach((item) => {
-    const day = item.date || "Unscheduled";
-    if (!grouped[day]) grouped[day] = [];
-    grouped[day].push(item);
-  });
-  Object.values(grouped).forEach((arr) => arr.sort((a, b) => (a.start_time || "").localeCompare(b.start_time || "")));
+  const today = moment().format("YYYY-MM-DD");
 
+  const pastItems = items.filter((item) => item.date && item.date < today);
+  const currentItems = items.filter((item) => !item.date || item.date >= today);
+
+  const groupItems = (list) => {
+    const g = {};
+    list.forEach((item) => {
+      const day = item.date || "Unscheduled";
+      if (!g[day]) g[day] = [];
+      g[day].push(item);
+    });
+    Object.values(g).forEach((arr) => arr.sort((a, b) => (a.start_time || "").localeCompare(b.start_time || "")));
+    return g;
+  };
+
+  const grouped = groupItems(currentItems);
   const sortedDays = Object.keys(grouped).sort();
+
+  const pastGrouped = groupItems(pastItems);
+  const pastSortedDays = Object.keys(pastGrouped).sort().reverse();
 
   return (
     <div className="space-y-6">
@@ -101,41 +152,33 @@ export default function ScheduleTab({ eventId, items, onRefresh, isAdmin, city }
         </div>
       ) : (
         <div className="space-y-6">
+          {/* Upcoming / current days */}
+          {sortedDays.length === 0 && (
+            <div className="text-center py-6 text-muted-foreground text-sm">No upcoming schedule items</div>
+          )}
           {sortedDays.map((day) => (
-            <div key={day}>
-              <h4 className="text-sm font-medium text-muted-foreground mb-3">
-                {day === "Unscheduled" ? day : moment(day).format("ddd, MMM D, YYYY")}
-              </h4>
-              <div className="space-y-2">
-                {grouped[day].map((item) => (
-                  <div key={item.id} className={cn("bg-card border border-border rounded-lg p-4 border-l-4 flex items-start justify-between group", typeColors[item.type] || "border-l-muted-foreground")}>
-                     <div>
-                       <div className="flex items-center gap-2 mb-1">
-                         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{typeLabels[item.type] || item.type}</span>
-                         {item.start_time && (
-                           <span className="text-xs text-muted-foreground">
-                             {formatTime(item.start_time)}{item.end_time ? ` – ${formatTime(item.end_time)}` : ""}
-                           </span>
-                         )}
-                       </div>
-                       <p className="font-medium text-sm">{item.title}</p>
-                       <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
-                         {item.location && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{item.location}</span>}
-                         {item.assigned_to && <span>{item.assigned_to}</span>}
-                         </div>
-                         {item.notes && <p className="mt-1.5 text-xs text-muted-foreground italic">{item.notes}</p>}
-                         </div>
-                     {isAdmin && (
-                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                       <button onClick={() => openEdit(item)} className="p-1 hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
-                       <button onClick={() => handleDelete(item.id)} className="p-1 hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
-                     </div>
-                     )}
-                   </div>
-                ))}
-              </div>
-            </div>
+            <DayGroup key={day} day={day} items={grouped[day]} isAdmin={isAdmin} onEdit={openEdit} onDelete={handleDelete} />
           ))}
+
+          {/* Past items collapsible */}
+          {pastSortedDays.length > 0 && (
+            <div>
+              <button
+                onClick={() => setShowPast((p) => !p)}
+                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full py-2 border-t border-border"
+              >
+                {showPast ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                <span className="font-medium">Past Items ({pastItems.length})</span>
+              </button>
+              {showPast && (
+                <div className="space-y-6 mt-4 opacity-70">
+                  {pastSortedDays.map((day) => (
+                    <DayGroup key={day} day={day} items={pastGrouped[day]} isAdmin={isAdmin} onEdit={openEdit} onDelete={handleDelete} />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
