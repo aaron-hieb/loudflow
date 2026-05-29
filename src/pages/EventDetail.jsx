@@ -167,7 +167,7 @@ export default function EventDetail() {
 
       {/* Tabs */}
       <Tabs defaultValue="schedule" className="w-full">
-        <TabsList className="w-full justify-start bg-muted/50 p-1">
+        <TabsList className="w-full justify-start bg-muted/50 p-1 overflow-x-auto flex-nowrap">
           <TabsTrigger value="schedule">Schedule</TabsTrigger>
           <TabsTrigger value="travel">Flights</TabsTrigger>
           <TabsTrigger value="hotels">Hotels</TabsTrigger>
