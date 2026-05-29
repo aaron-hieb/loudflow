@@ -99,7 +99,14 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
               </button>
               {!collapsed[cat] && <div className="space-y-2">
                 {catItems.map((item) => (
-                  <div key={item.id} className={`border rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 group ${item.status === 'packed' ? 'bg-red-50 border-red-200 dark:bg-red-950/30 dark:border-red-800' : 'bg-card border-border'}`}>
+                  <div key={item.id} className={`border rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 group ${
+                      item.status === 'packed' ? 'bg-red-50 border-red-200 dark:bg-red-950/30 dark:border-red-800' :
+                      item.status === 'prepped' ? 'bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800' :
+                      item.status === 'unloaded' ? 'bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800' :
+                      item.status === 'unpacked' ? 'bg-green-50 border-green-200 dark:bg-green-950/30 dark:border-green-800' :
+                      item.status === 'rented' ? 'bg-yellow-50 border-yellow-200 dark:bg-yellow-950/30 dark:border-yellow-800' :
+                      'bg-card border-border'
+                    }`}>
                     <div className="flex items-center gap-3 min-w-0">
                       <span className="text-sm font-mono text-muted-foreground w-8 shrink-0">{item.quantity}x</span>
                       <div className="min-w-0">
@@ -115,8 +122,8 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
                           <SelectItem value="in_shop">In Shop</SelectItem>
                           <SelectItem value="prepped">Prepped</SelectItem>
                           <SelectItem value="packed">Packed</SelectItem>
-                          <SelectItem value="unloaded">Unloaded</SelectItem>
-                          <SelectItem value="unpacked">Unpacked</SelectItem>
+                          <SelectItem value="unloaded">On Site</SelectItem>
+                          <SelectItem value="unpacked">Returned</SelectItem>
                           <SelectItem value="rented">Rented</SelectItem>
                         </SelectContent>
                       </Select>
@@ -165,8 +172,8 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
                     <SelectItem value="in_shop">In Shop</SelectItem>
                     <SelectItem value="prepped">Prepped</SelectItem>
                     <SelectItem value="packed">Packed</SelectItem>
-                    <SelectItem value="unloaded">Unloaded</SelectItem>
-                    <SelectItem value="unpacked">Unpacked</SelectItem>
+                    <SelectItem value="unloaded">On Site</SelectItem>
+                    <SelectItem value="unpacked">Returned</SelectItem>
                     <SelectItem value="rented">Rented</SelectItem>
                     </SelectContent>
                 </Select>
