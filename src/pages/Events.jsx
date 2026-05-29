@@ -41,7 +41,14 @@ export default function Events() {
     loadEvents();
   }
 
-  const filtered = events.filter((e) => {
+  const today = new Date().toISOString().split("T")[0];
+
+  const activeEvents = events.filter((e) => {
+    const isCompleted = e.status === "completed" || (e.end_date && e.end_date < today);
+    return !isCompleted;
+  });
+
+  const filtered = activeEvents.filter((e) => {
     const matchSearch = !search || e.name?.toLowerCase().includes(search.toLowerCase()) || e.client?.toLowerCase().includes(search.toLowerCase());
     const matchStatus = filterStatus === "all" || e.status === filterStatus;
     return matchSearch && matchStatus;
@@ -79,7 +86,6 @@ export default function Events() {
             <SelectItem value="planning">Planning</SelectItem>
             <SelectItem value="confirmed">Confirmed</SelectItem>
             <SelectItem value="in_progress">In Progress</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
             <SelectItem value="cancelled">Cancelled</SelectItem>
           </SelectContent>
         </Select>

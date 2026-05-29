@@ -11,7 +11,9 @@ export default function PastEvents() {
 
   useEffect(() => {
     async function load() {
-      const data = await base44.entities.Event.filter({ status: "completed" }, "-end_date", 200);
+      const all = await base44.entities.Event.list("-end_date", 200);
+      const today = new Date().toISOString().split("T")[0];
+      const data = all.filter((e) => e.status === "completed" || (e.end_date && e.end_date < today));
       setEvents(data);
       setLoading(false);
     }
