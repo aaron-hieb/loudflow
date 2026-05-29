@@ -49,6 +49,18 @@
     "notes": {
       "type": "string",
       "title": "Notes"
+    },
+    "attached_file_id": {
+      "type": "string",
+      "title": "Attached File ID"
+    },
+    "attached_file_name": {
+      "type": "string",
+      "title": "Attached File Name"
+    },
+    "attached_file_url": {
+      "type": "string",
+      "title": "Attached File URL"
     }
   },
   "required": [

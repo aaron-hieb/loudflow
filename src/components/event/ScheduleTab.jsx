@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Clock, MapPin, Trash2, Pencil, ChevronDown, ChevronRight } from "lucide-react";
+import { Plus, Clock, MapPin, Trash2, Pencil, ChevronDown, ChevronRight, Paperclip, ExternalLink, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,7 +35,7 @@ const typeLabels = {
   other: "Other",
 };
 
-const emptyForm = { title: "", date: "", start_time: "", end_time: "", location: "", assigned_to: "", type: "other", notes: "" };
+const emptyForm = { title: "", date: "", start_time: "", end_time: "", location: "", assigned_to: "", type: "other", notes: "", attached_file_id: "", attached_file_name: "", attached_file_url: "" };
 
 function formatTime(t) {
   if (!t) return "";
@@ -51,7 +51,7 @@ function DayGroup({ day, items, isAdmin, onEdit, onDelete }) {
       <div className="space-y-2">
         {items.map((item) => (
           <div key={item.id} className={cn("bg-card border border-border rounded-lg p-4 border-l-4 flex items-start justify-between group", typeColors[item.type] || "border-l-muted-foreground")}>
-            <div>
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{typeLabels[item.type] || item.type}</span>
                 {item.start_time && (
@@ -66,9 +66,22 @@ function DayGroup({ day, items, isAdmin, onEdit, onDelete }) {
                 {item.assigned_to && <span>{item.assigned_to}</span>}
               </div>
               {item.notes && <p className="mt-1.5 text-xs text-muted-foreground italic">{item.notes}</p>}
+              {item.attached_file_url && (
+                <a
+                  href={item.attached_file_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 mt-2 text-xs text-primary hover:underline"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Paperclip className="h-3 w-3" />
+                  {item.attached_file_name || "Attached File"}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              )}
             </div>
             {isAdmin && (
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2 shrink-0">
                 <button onClick={() => onEdit(item)} className="p-1 hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
                 <button onClick={() => onDelete(item.id)} className="p-1 hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
               </div>
@@ -80,7 +93,7 @@ function DayGroup({ day, items, isAdmin, onEdit, onDelete }) {
   );
 }
 
-export default function ScheduleTab({ eventId, items, onRefresh, isAdmin, city }) {
+export default function ScheduleTab({ eventId, items, onRefresh, isAdmin, city, eventFiles = [] }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
@@ -89,7 +102,7 @@ export default function ScheduleTab({ eventId, items, onRefresh, isAdmin, city }
 
   function openAdd() { setForm(emptyForm); setEditId(null); setShowForm(true); }
   function openEdit(item) {
-    setForm({ title: item.title || "", date: item.date || "", start_time: item.start_time || "", end_time: item.end_time || "", location: item.location || "", assigned_to: item.assigned_to || "", type: item.type || "other", notes: item.notes || "" });
+    setForm({ title: item.title || "", date: item.date || "", start_time: item.start_time || "", end_time: item.end_time || "", location: item.location || "", assigned_to: item.assigned_to || "", type: item.type || "other", notes: item.notes || "", attached_file_id: item.attached_file_id || "", attached_file_name: item.attached_file_name || "", attached_file_url: item.attached_file_url || "" });
     setEditId(item.id);
     setShowForm(true);
   }
@@ -224,6 +237,36 @@ export default function ScheduleTab({ eventId, items, onRefresh, isAdmin, city }
             <div>
               <Label>Notes</Label>
               <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+            </div>
+            <div>
+              <Label>Attach File</Label>
+              {eventFiles.length === 0 ? (
+                <p className="text-xs text-muted-foreground mt-1">No files uploaded yet. Add files in the Files tab.</p>
+              ) : (
+                <div className="mt-1 space-y-1">
+                  {form.attached_file_id ? (
+                    <div className="flex items-center gap-2 text-sm border border-border rounded-md px-3 py-2">
+                      <Paperclip className="h-3.5 w-3.5 text-primary shrink-0" />
+                      <span className="flex-1 truncate">{form.attached_file_name}</span>
+                      <button type="button" onClick={() => setForm({ ...form, attached_file_id: "", attached_file_name: "", attached_file_url: "" })} className="hover:text-destructive transition-colors">
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <Select value={form.attached_file_id} onValueChange={(fileId) => {
+                      const file = eventFiles.find((f) => f.id === fileId);
+                      if (file) setForm({ ...form, attached_file_id: file.id, attached_file_name: file.name, attached_file_url: file.file_url });
+                    }}>
+                      <SelectTrigger><SelectValue placeholder="Select a file…" /></SelectTrigger>
+                      <SelectContent>
+                        {eventFiles.map((f) => (
+                          <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+              )}
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>

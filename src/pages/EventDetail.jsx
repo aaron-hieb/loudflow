@@ -182,7 +182,7 @@ export default function EventDetail() {
           <TabsTrigger value="chat">Chat</TabsTrigger>
         </TabsList>
         <TabsContent value="schedule" className="mt-6">
-          <ScheduleTab eventId={eventId} items={scheduleItems} onRefresh={loadAll} isAdmin={isAdmin} city={event.city} />
+          <ScheduleTab eventId={eventId} items={scheduleItems} onRefresh={loadAll} isAdmin={isAdmin} city={event.city} eventFiles={eventFiles} />
         </TabsContent>
         <TabsContent value="travel" className="mt-6">
           <TravelTab eventId={eventId} flights={flights} onRefresh={loadAll} isAdmin={isAdmin} />
