@@ -206,7 +206,7 @@ export default function ReceiptScanner({ onScanned, onClose }) {
     setStep("processing");
     const canvas = canvasRef.current;
     const img = imgRef.current;
-    const c = cornersRef.current;
+    const c = cornersRef.current || autoDetectBounds(img, canvas.width, canvas.height);
 
     // Bounding box of the four corners (for simple rect crop)
     const scaleX = img.naturalWidth / canvas.width;
@@ -297,7 +297,7 @@ export default function ReceiptScanner({ onScanned, onClose }) {
               <Button variant="outline" size="sm" onClick={retake} className="gap-1.5">
                 <RotateCw className="h-3.5 w-3.5" /> Retake
               </Button>
-              <Button size="sm" onClick={handleConfirmCrop} disabled={!corners} className="gap-1.5">
+              <Button size="sm" onClick={handleConfirmCrop} className="gap-1.5">
                 <Check className="h-3.5 w-3.5" /> Confirm & Save
               </Button>
             </div>
