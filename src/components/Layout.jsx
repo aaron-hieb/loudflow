@@ -115,7 +115,7 @@ export default function Layout() {
           <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center">
             <Zap className="h-3.5 w-3.5 text-primary-foreground" />
           </div>
-          <span className="font-bold text-base">Prodflow</span>
+          <span className="font-bold text-base">FLOWDADDY</span>
         </Link>
         <button onClick={() => setDark(!dark)} className="p-2 text-muted-foreground hover:text-foreground transition-colors">
           {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
