@@ -133,7 +133,7 @@ export default function CrewTab({ eventId, crew, onRefresh, isAdmin }) {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-hidden">
       <div className="flex justify-between items-center gap-2">
         <h3 className="font-semibold">Crew List <span className="text-muted-foreground font-normal text-sm">({crew.length})</span></h3>
         {isAdmin && (

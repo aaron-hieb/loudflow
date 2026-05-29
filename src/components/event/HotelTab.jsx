@@ -44,7 +44,7 @@ export default function HotelTab({ eventId, hotels, onRefresh, isAdmin }) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-hidden">
       <div className="flex justify-between items-center">
         <h3 className="font-semibold">Hotels</h3>
         {isAdmin && (

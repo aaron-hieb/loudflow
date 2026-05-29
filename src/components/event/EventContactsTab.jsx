@@ -85,7 +85,7 @@ export default function EventContactsTab({ eventId, isAdmin }) {
   const unlinked = allContacts.filter((c) => !linkedIds.has(c.id));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-hidden">
       <div className="flex justify-between items-center">
         <h3 className="font-semibold">Event Contacts</h3>
         {isAdmin && (

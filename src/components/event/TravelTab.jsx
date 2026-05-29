@@ -70,7 +70,7 @@ export default function TravelTab({ eventId, flights, onRefresh, isAdmin }) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-hidden">
       <div className="flex justify-between items-center">
         <h3 className="font-semibold">Flights</h3>
         {isAdmin && (

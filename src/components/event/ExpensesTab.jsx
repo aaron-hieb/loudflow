@@ -84,7 +84,7 @@ export default function ExpensesTab({ eventId, budget }) {
   if (loading) return <div className="flex justify-center py-12"><div className="w-6 h-6 border-4 border-muted border-t-primary rounded-full animate-spin" /></div>;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 overflow-x-hidden">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold">Expenses</h3>
@@ -98,7 +98,7 @@ export default function ExpensesTab({ eventId, budget }) {
       </div>
 
       {netEarnings != null && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2">
           <div className="bg-card border border-border rounded-xl p-4 text-center">
             <p className="text-xs text-muted-foreground mb-1">Budget</p>
             <p className="text-lg font-bold">${Number(budget).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>

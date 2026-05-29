@@ -114,7 +114,7 @@ export default function ReimbursementsTab({ eventId, isAdmin }) {
   if (loading) return <div className="flex justify-center py-12"><div className="w-6 h-6 border-4 border-muted border-t-primary rounded-full animate-spin" /></div>;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 overflow-x-hidden">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Reimbursements</h3>
         <Button size="sm" onClick={() => setShowForm(true)} className="gap-1.5">
@@ -150,7 +150,7 @@ export default function ReimbursementsTab({ eventId, isAdmin }) {
                     <p className="text-xs text-muted-foreground mt-1 bg-muted/50 rounded px-2 py-1">{item.notes}</p>
                   )}
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
                   {item.receipt_url && (
                     <>
                       <a href={item.receipt_url} target="_blank" rel="noopener noreferrer">

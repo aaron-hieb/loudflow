@@ -340,7 +340,7 @@ export default function VenueTab({ eventId, isAdmin, startDate, endDate, city })
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-hidden">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">{venue.venue_name}</h3>
         {isAdmin && (
