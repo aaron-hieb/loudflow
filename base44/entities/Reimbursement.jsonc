@@ -38,6 +38,15 @@
         "rejected"
       ],
       "title": "Status"
+    },
+    "added_to_expenses": {
+      "type": "boolean",
+      "title": "Added to Expenses",
+      "default": false
+    },
+    "expense_id": {
+      "type": "string",
+      "title": "Linked Expense ID"
     }
   },
   "required": [

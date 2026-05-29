@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Receipt, Plus, Loader2, ExternalLink, Trash2, Camera, Download } from "lucide-react";
+import { Receipt, Plus, Loader2, ExternalLink, Trash2, Camera, Download, CheckSquare, Square } from "lucide-react";
 import ReceiptScanner from "./ReceiptScanner";
 
 const statusStyles = {
@@ -27,6 +27,7 @@ export default function ReimbursementsTab({ eventId, isAdmin }) {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
+  const [addingToExpenses, setAddingToExpenses] = useState({});
 
   useEffect(() => { load(); }, [eventId]);
 
@@ -80,6 +81,33 @@ export default function ReimbursementsTab({ eventId, isAdmin }) {
 
   async function handleDelete(id) {
     await base44.entities.Reimbursement.delete(id);
+    load();
+  }
+
+  async function handleAddToExpenses(item) {
+    const alreadyAdded = item.added_to_expenses;
+    setAddingToExpenses((prev) => ({ ...prev, [item.id]: true }));
+
+    if (alreadyAdded) {
+      // Remove the linked expense and unmark
+      if (item.expense_id) {
+        await base44.entities.Expense.delete(item.expense_id);
+      }
+      await base44.entities.Reimbursement.update(item.id, { added_to_expenses: false, expense_id: null });
+    } else {
+      // Create expense from reimbursement
+      const expense = await base44.entities.Expense.create({
+        event_id: eventId,
+        description: item.description || `Reimbursement - ${item.reimbursement_to}`,
+        amount: item.amount || 0,
+        category: "other",
+        vendor: item.reimbursement_to,
+        notes: `Auto-added from approved reimbursement. Submitted by: ${item.submitted_by || "Unknown"}`,
+      });
+      await base44.entities.Reimbursement.update(item.id, { added_to_expenses: true, expense_id: expense.id });
+    }
+
+    setAddingToExpenses((prev) => ({ ...prev, [item.id]: false }));
     load();
   }
 
@@ -151,6 +179,27 @@ export default function ReimbursementsTab({ eventId, isAdmin }) {
                           <SelectItem value="rejected">Rejected</SelectItem>
                         </SelectContent>
                       </Select>
+                      {item.status === "approved" && (
+                        <button
+                          onClick={() => handleAddToExpenses(item)}
+                          disabled={!!addingToExpenses[item.id]}
+                          className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded-md border transition-colors ${
+                            item.added_to_expenses
+                              ? "bg-emerald-50 border-emerald-300 text-emerald-700 dark:bg-emerald-950/30 dark:border-emerald-700 dark:text-emerald-400"
+                              : "border-border text-muted-foreground hover:border-primary hover:text-primary"
+                          }`}
+                          title={item.added_to_expenses ? "Remove from expenses" : "Add to expenses"}
+                        >
+                          {addingToExpenses[item.id] ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : item.added_to_expenses ? (
+                            <CheckSquare className="h-3.5 w-3.5" />
+                          ) : (
+                            <Square className="h-3.5 w-3.5" />
+                          )}
+                          Expenses
+                        </button>
+                      )}
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(item.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
