@@ -12,7 +12,7 @@ const categories = ["travel", "accommodation", "food", "equipment", "venue", "ma
 
 const defaultForm = { description: "", amount: "", category: "other", vendor: "", notes: "" };
 
-export default function ExpensesTab({ eventId }) {
+export default function ExpensesTab({ eventId, budget }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -73,6 +73,7 @@ export default function ExpensesTab({ eventId }) {
   }
 
   const total = items.reduce((sum, i) => sum + (Number(i.amount) || 0), 0);
+  const netEarnings = budget != null ? Number(budget) - total : null;
 
   const grouped = categories.reduce((acc, cat) => {
     const catItems = items.filter((i) => i.category === cat);
@@ -95,6 +96,25 @@ export default function ExpensesTab({ eventId }) {
           <Plus className="h-4 w-4" /> Add Expense
         </Button>
       </div>
+
+      {netEarnings != null && (
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-card border border-border rounded-xl p-4 text-center">
+            <p className="text-xs text-muted-foreground mb-1">Budget</p>
+            <p className="text-lg font-bold">${Number(budget).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+          </div>
+          <div className="bg-card border border-border rounded-xl p-4 text-center">
+            <p className="text-xs text-muted-foreground mb-1">Total Expenses</p>
+            <p className="text-lg font-bold text-destructive">${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+          </div>
+          <div className={`rounded-xl p-4 text-center border ${netEarnings >= 0 ? "bg-emerald-50 border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-800" : "bg-destructive/10 border-destructive/20"}`}>
+            <p className="text-xs text-muted-foreground mb-1">Net Earnings</p>
+            <p className={`text-lg font-bold ${netEarnings >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"}`}>
+              {netEarnings < 0 ? "-" : ""}${Math.abs(netEarnings).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+          </div>
+        </div>
+      )}
 
       {items.length === 0 ? (
         <div className="bg-card rounded-xl border border-border p-12 text-center">

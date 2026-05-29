@@ -208,7 +208,7 @@ export default function EventDetail() {
         </TabsContent>
         {isAdmin && (
           <TabsContent value="expenses" className="mt-6">
-            <ExpensesTab eventId={eventId} />
+            <ExpensesTab eventId={eventId} budget={event.budget} />
           </TabsContent>
         )}
       </Tabs>
