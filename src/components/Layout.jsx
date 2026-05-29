@@ -3,6 +3,7 @@ import { LayoutDashboard, Users, FolderOpen, Menu, X, Zap, Sun, Moon } from "luc
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/AuthContext";
+import AdminUserApprovalPanel from "@/components/AdminUserApprovalPanel";
 
 const navItems = [
 { path: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -59,6 +60,11 @@ export default function Layout() {
           })}
         </nav>
         <div className="p-4 border-t border-border">
+          {user?.role === "admin" && (
+            <div className="mb-2 px-1">
+              <AdminUserApprovalPanel />
+            </div>
+          )}
           <button onClick={() => setDark(!dark)} className="flex items-center gap-2 px-3 py-2 w-full text-sm text-muted-foreground hover:text-foreground transition-colors mb-1">
             {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             {dark ? "Light mode" : "Dark mode"}

@@ -16,6 +16,48 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import PendingApprovalScreen from './components/PendingApprovalScreen';
+import { useEffect, useState } from 'react';
+import { base44 } from '@/api/base44Client';
+
+const ApprovalGate = ({ children }) => {
+  const { user } = useAuth();
+  const [approvalStatus, setApprovalStatus] = useState(null);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    if (!user) { setChecking(false); return; }
+    if (user.role === "admin") { setApprovalStatus("approved"); setChecking(false); return; }
+
+    const checkOrCreate = async () => {
+      const existing = await base44.entities.UserApproval.filter({ user_email: user.email });
+      if (existing.length > 0) {
+        setApprovalStatus(existing[0].status);
+      } else {
+        await base44.entities.UserApproval.create({
+          user_email: user.email,
+          user_name: user.full_name || user.email,
+          status: "pending",
+        });
+        setApprovalStatus("pending");
+      }
+      setChecking(false);
+    };
+    checkOrCreate();
+  }, [user]);
+
+  if (checking) return (
+    <div className="fixed inset-0 flex items-center justify-center">
+      <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+    </div>
+  );
+
+  if (approvalStatus === "pending" || approvalStatus === "denied") {
+    return <PendingApprovalScreen status={approvalStatus} />;
+  }
+
+  return children;
+};
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -48,7 +90,7 @@ const AuthenticatedApp = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
-        <Route element={<Layout />}>
+        <Route element={<ApprovalGate><Layout /></ApprovalGate>}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/events" element={<Events />} />
           <Route path="/events/:eventId" element={<EventDetail />} />
