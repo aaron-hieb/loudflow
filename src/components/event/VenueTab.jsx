@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { MapPin, Phone, Clock, Car, Wifi, Users, Pencil, CloudSun } from "lucide-react";
+import { MapPin, Phone, Clock, Car, Wifi, Users, Pencil, CloudSun, Wind, Droplets, Eye, Thermometer, X } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import moment from "moment";
 
 const WMO_CODES = {
@@ -19,6 +20,31 @@ const WMO_EMOJI = {
   51: "🌦", 53: "🌧", 55: "🌧", 61: "🌦", 63: "🌧", 65: "🌧",
   71: "🌨", 73: "❄️", 75: "❄️", 80: "🌦", 81: "🌧", 82: "⛈", 95: "⛈", 99: "⛈"
 };
+
+async function fetchHourlyWeather(city, date) {
+  const cityName = city.split(",")[0].trim();
+  const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&format=json`);
+  const geoData = await geoRes.json();
+  if (!geoData.results?.length) return [];
+  const { latitude, longitude } = geoData.results[0];
+
+  const wxRes = await fetch(
+    `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,precipitation_probability,weathercode,windspeed_10m,relativehumidity_2m,visibility&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=auto&start_date=${date}&end_date=${date}`
+  );
+  const wxData = await wxRes.json();
+  if (!wxData.hourly?.time?.length) return [];
+
+  return wxData.hourly.time.map((time, i) => ({
+    time,
+    hour: moment(time).format("h A"),
+    code: wxData.hourly.weathercode[i],
+    temp: Math.round(wxData.hourly.temperature_2m[i]),
+    precipProb: wxData.hourly.precipitation_probability[i],
+    wind: Math.round(wxData.hourly.windspeed_10m[i]),
+    humidity: wxData.hourly.relativehumidity_2m[i],
+    visibility: wxData.hourly.visibility ? Math.round(wxData.hourly.visibility[i] / 5280) : null,
+  }));
+}
 
 async function fetchWeather(city, startDate, endDate) {
   // Geocode city — use just the city name part before any comma for better results
@@ -53,6 +79,9 @@ async function fetchWeather(city, startDate, endDate) {
 export default function VenueTab({ eventId, isAdmin, startDate, endDate, city }) {
   const [weather, setWeather] = useState(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [hourlyData, setHourlyData] = useState(null);
+  const [hourlyLoading, setHourlyLoading] = useState(false);
   const [venue, setVenue] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -179,6 +208,16 @@ export default function VenueTab({ eventId, isAdmin, startDate, endDate, city })
     );
   }
 
+  async function handleDayClick(day) {
+    const weatherCity = city || venue?.city;
+    setSelectedDay(day);
+    setHourlyData(null);
+    setHourlyLoading(true);
+    const data = await fetchHourlyWeather(weatherCity, day.date);
+    setHourlyData(data);
+    setHourlyLoading(false);
+  }
+
   const weatherCity = city || venue?.city;
   const weatherCard = weatherCity && startDate ? (
     <div className="bg-card border border-border rounded-xl p-4">
@@ -194,14 +233,18 @@ export default function VenueTab({ eventId, isAdmin, startDate, endDate, city })
       ) : weather?.length ? (
         <div className="flex gap-3 overflow-x-auto pb-1">
           {weather.map((day) => (
-            <div key={day.date} className="flex flex-col items-center gap-1 min-w-[64px] bg-muted/40 rounded-lg p-2">
+            <button
+              key={day.date}
+              onClick={() => handleDayClick(day)}
+              className="flex flex-col items-center gap-1 min-w-[64px] bg-muted/40 hover:bg-muted rounded-lg p-2 transition-colors cursor-pointer border border-transparent hover:border-primary/30"
+            >
               <p className="text-xs text-muted-foreground">{moment(day.date).format("ddd M/D")}</p>
               <span className="text-2xl">{WMO_EMOJI[day.code] ?? "🌡"}</span>
               <p className="text-xs font-semibold">{day.high}°</p>
               <p className="text-xs text-muted-foreground">{day.low}°</p>
               <p className="text-xs text-center text-muted-foreground leading-tight">{WMO_CODES[day.code] ?? ""}</p>
               {day.precip > 0 && <p className="text-xs text-blue-500">💧{day.precip}"</p>}
-            </div>
+            </button>
           ))}
         </div>
       ) : (
@@ -209,6 +252,74 @@ export default function VenueTab({ eventId, isAdmin, startDate, endDate, city })
       )}
     </div>
   ) : null;
+
+  const dayDetailDialog = (
+    <Dialog open={!!selectedDay} onOpenChange={(o) => { if (!o) setSelectedDay(null); }}>
+      <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+        {selectedDay && (
+          <>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <span className="text-2xl">{WMO_EMOJI[selectedDay.code] ?? "🌡"}</span>
+                <div>
+                  <div>{moment(selectedDay.date).format("dddd, MMMM D")}</div>
+                  <div className="text-sm font-normal text-muted-foreground">{WMO_CODES[selectedDay.code]} · {weatherCity}</div>
+                </div>
+              </DialogTitle>
+            </DialogHeader>
+            <div className="grid grid-cols-2 gap-3 mt-2">
+              <div className="bg-muted/40 rounded-lg p-3 flex items-center gap-2">
+                <Thermometer className="h-4 w-4 text-primary" />
+                <div>
+                  <p className="text-xs text-muted-foreground">High / Low</p>
+                  <p className="text-sm font-semibold">{selectedDay.high}° / {selectedDay.low}°F</p>
+                </div>
+              </div>
+              {selectedDay.precip > 0 && (
+                <div className="bg-muted/40 rounded-lg p-3 flex items-center gap-2">
+                  <Droplets className="h-4 w-4 text-blue-500" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Precipitation</p>
+                    <p className="text-sm font-semibold">{selectedDay.precip}"</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="mt-4">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Hourly Forecast</p>
+              {hourlyLoading ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground py-4 justify-center">
+                  <div className="w-4 h-4 border-2 border-muted border-t-primary rounded-full animate-spin" />
+                  Loading hourly data…
+                </div>
+              ) : hourlyData?.length ? (
+                <div className="space-y-1.5">
+                  {hourlyData.map((h) => (
+                    <div key={h.time} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-muted/30 text-sm">
+                      <span className="w-14 text-xs text-muted-foreground shrink-0">{h.hour}</span>
+                      <span className="text-base">{WMO_EMOJI[h.code] ?? "🌡"}</span>
+                      <span className="font-medium w-10 shrink-0">{h.temp}°F</span>
+                      <div className="flex items-center gap-1 text-xs text-blue-500 w-10 shrink-0">
+                        <Droplets className="h-3 w-3" />{h.precipProb}%
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Wind className="h-3 w-3" />{h.wind} mph
+                      </div>
+                      {h.humidity != null && (
+                        <div className="text-xs text-muted-foreground ml-auto">{h.humidity}% humidity</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No hourly data available.</p>
+              )}
+            </div>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
 
   if (!venue || !venue.venue_name) {
     return (
@@ -223,6 +334,7 @@ export default function VenueTab({ eventId, isAdmin, startDate, endDate, city })
           )}
         </div>
         {weatherCard}
+        {dayDetailDialog}
       </div>
     );
   }
@@ -324,6 +436,7 @@ export default function VenueTab({ eventId, isAdmin, startDate, endDate, city })
       )}
 
       {weatherCard}
+      {dayDetailDialog}
     </div>
   );
 }
