@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Package, Search, ChevronDown, ChevronRight } from "lucide-react";
+import { Plus, Package, Search, ChevronDown, ChevronRight, Info } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -19,6 +19,7 @@ export default function AddFromInventoryPanel({ eventId, existingItems, onAdded 
   const [collapsed, setCollapsed] = useState(
     Object.fromEntries(Object.keys(categoryLabels).map((k) => [k, true]))
   );
+  const [expanded, setExpanded] = useState({});
 
   useEffect(() => {
     Promise.all([
@@ -133,13 +134,27 @@ export default function AddFromInventoryPanel({ eventId, existingItems, onAdded 
                       return (
                         <div key={item.id} className="rounded-md px-2 py-2 hover:bg-muted/50 transition-colors">
                           <div className="flex items-center justify-between gap-2 mb-1">
-                            <div className="min-w-0">
-                              <p className="text-sm font-medium truncate">{item.name}</p>
+                            <div className="min-w-0 flex-1">
+                              <button
+                                className="flex items-center gap-1 text-left w-full group/info"
+                                onClick={() => setExpanded((e) => ({ ...e, [item.id]: !e[item.id] }))}
+                              >
+                                <p className="text-sm font-medium truncate">{item.name}</p>
+                                <Info className="h-3 w-3 text-muted-foreground/50 group-hover/info:text-muted-foreground shrink-0 transition-colors" />
+                              </button>
                               <p className={`text-xs ${outOfStock ? "text-destructive" : "text-muted-foreground"}`}>
-                                {available} in shop
+                                {available} / {item.quantity} in shop
                               </p>
                             </div>
                           </div>
+                          {expanded[item.id] && (
+                            <div className="mb-2 p-2 bg-muted/40 rounded text-xs space-y-1 text-muted-foreground">
+                              <div className="flex justify-between"><span className="font-medium">Category</span><span>{categoryLabels[item.category] || item.category}</span></div>
+                              <div className="flex justify-between"><span className="font-medium">Total owned</span><span>{item.quantity}</span></div>
+                              <div className="flex justify-between"><span className="font-medium">Available</span><span>{available}</span></div>
+                              {item.notes && <div className="pt-1 border-t border-border"><span className="font-medium">Notes: </span>{item.notes}</div>}
+                            </div>
+                          )}
                           {!alreadyAdded && !outOfStock && (
                             <div className="flex items-center gap-1.5 mt-1">
                               <div className="flex items-center border border-border rounded-md overflow-hidden">
