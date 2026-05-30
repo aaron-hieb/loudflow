@@ -244,18 +244,22 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
                     className="h-9 w-9 flex items-center justify-center rounded-md border border-input bg-transparent hover:bg-accent transition-colors text-lg font-medium shrink-0"
                   >−</button>
                   <Input
-                    type="text"
-                    inputMode="numeric"
-                    value={form.quantity}
-                    onChange={(e) => {
-                      const v = parseInt(e.target.value.replace(/\D/g, ""), 10);
-                      setForm({ ...form, quantity: isNaN(v) ? "" : Math.max(1, v) });
-                    }}
-                    className="text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                   type="text"
+                   inputMode="numeric"
+                   value={form.quantity}
+                   onChange={(e) => {
+                     const raw = e.target.value.replace(/\D/g, "");
+                     setForm({ ...form, quantity: raw === "" ? "" : raw });
+                   }}
+                   onBlur={() => {
+                     const v = parseInt(form.quantity, 10);
+                     setForm((f) => ({ ...f, quantity: isNaN(v) || v < 1 ? 1 : v }));
+                   }}
+                   className="text-center"
                   />
                   <button
                     type="button"
-                    onClick={() => setForm({ ...form, quantity: Number(form.quantity) + 1 })}
+                    onClick={() => setForm({ ...form, quantity: (parseInt(form.quantity, 10) || 1) + 1 })}
                     className="h-9 w-9 flex items-center justify-center rounded-md border border-input bg-transparent hover:bg-accent transition-colors text-lg font-medium shrink-0"
                   >+</button>
                 </div>
