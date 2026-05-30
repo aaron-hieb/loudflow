@@ -244,11 +244,14 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
                     className="h-9 w-9 flex items-center justify-center rounded-md border border-input bg-transparent hover:bg-accent transition-colors text-lg font-medium shrink-0"
                   >−</button>
                   <Input
-                    type="number"
-                    min={1}
+                    type="text"
+                    inputMode="numeric"
                     value={form.quantity}
-                    onChange={(e) => setForm({ ...form, quantity: e.target.value === "" ? "" : Math.max(1, Number(e.target.value)) })}
-                    className="text-center"
+                    onChange={(e) => {
+                      const v = parseInt(e.target.value.replace(/\D/g, ""), 10);
+                      setForm({ ...form, quantity: isNaN(v) ? "" : Math.max(1, v) });
+                    }}
+                    className="text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                   <button
                     type="button"

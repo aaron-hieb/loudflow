@@ -148,12 +148,11 @@ export default function AddFromInventoryPanel({ eventId, existingItems, onAdded 
                                   onClick={() => setQtys((q) => ({ ...q, [item.id]: Math.max(1, qty - 1) }))}
                                 >−</button>
                                 <input
-                                  type="number"
-                                  min={1}
-                                  max={available}
+                                  type="text"
+                                  inputMode="numeric"
                                   value={qty}
                                   onChange={(e) => {
-                                    const v = parseInt(e.target.value, 10);
+                                    const v = parseInt(e.target.value.replace(/\D/g, ""), 10);
                                     if (!isNaN(v)) setQtys((q) => ({ ...q, [item.id]: Math.min(available, Math.max(1, v)) }));
                                   }}
                                   className="w-8 text-xs font-mono text-center bg-transparent border-0 outline-none py-0.5"
