@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Package, Trash2, Pencil, ChevronDown, ChevronRight } from "lucide-react";
+import { Plus, Package, Trash2, Pencil, ChevronDown, ChevronRight, RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import AddFromInventoryPanel from "./AddFromInventoryPanel";
 
@@ -51,6 +51,21 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
 
   async function handleStatusChange(id, newStatus) {
     await base44.entities.GearItem.update(id, { status: newStatus });
+    onRefresh();
+  }
+
+  const [showReturnConfirm, setShowReturnConfirm] = useState(false);
+  const [returningAll, setReturningAll] = useState(false);
+
+  async function handleReturnAll() {
+    setReturningAll(true);
+    await Promise.all(
+      items
+        .filter((i) => i.status !== "unpacked")
+        .map((i) => base44.entities.GearItem.update(i.id, { status: "unpacked" }))
+    );
+    setReturningAll(false);
+    setShowReturnConfirm(false);
     onRefresh();
   }
 
@@ -103,9 +118,16 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
 <div className="flex justify-between items-center">
         <h3 className="font-semibold">Gear &amp; Equipment</h3>
         {isAdmin && (
-        <Button size="sm" onClick={openAdd} className="gap-1.5">
-          <Plus className="h-3.5 w-3.5" /> Add Gear
-        </Button>
+          <div className="flex items-center gap-2">
+            {items.length > 0 && (
+              <Button size="sm" variant="outline" onClick={() => setShowReturnConfirm(true)} className="gap-1.5 text-muted-foreground">
+                <RotateCcw className="h-3.5 w-3.5" /> Return All
+              </Button>
+            )}
+            <Button size="sm" onClick={openAdd} className="gap-1.5">
+              <Plus className="h-3.5 w-3.5" /> Add Gear
+            </Button>
+          </div>
         )}
       </div>
 
@@ -176,6 +198,24 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
       )}
 
       </div>{/* end main gear list */}
+
+      {/* Return All Confirmation */}
+      <Dialog open={showReturnConfirm} onOpenChange={(o) => { if (!o) setShowReturnConfirm(false); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Return All Items?</DialogTitle>
+            <DialogDescription>
+              This will mark all gear items on this event as <strong>Returned</strong>, freeing them back to shop inventory. This cannot be undone automatically.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 mt-2">
+            <Button variant="outline" onClick={() => setShowReturnConfirm(false)}>Cancel</Button>
+            <Button onClick={handleReturnAll} disabled={returningAll}>
+              {returningAll ? "Returning..." : "Return All"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showForm} onOpenChange={(o) => { if (!o) setShowForm(false); }}>
         <DialogContent>
