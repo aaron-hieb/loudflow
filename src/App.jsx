@@ -14,6 +14,7 @@ import EventDetail from './pages/EventDetail';
 import Contacts from './pages/Contacts';
 import MonthlyExpenses from './pages/MonthlyExpenses';
 import PastEvents from './pages/PastEvents';
+import Inventory from './pages/Inventory';
 import AdminReceipts from './pages/AdminReceipts';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -101,6 +102,7 @@ const AuthenticatedApp = () => {
           <Route path="/monthly-expenses" element={<MonthlyExpenses />} />
           <Route path="/admin-receipts" element={<AdminReceipts />} />
           <Route path="/past-events" element={<PastEvents />} />
+          <Route path="/inventory" element={<Inventory />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

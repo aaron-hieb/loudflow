@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, FolderOpen, Menu, X, Zap, Sun, Moon, BarChart2, Archive, Receipt } from "lucide-react";
+import { LayoutDashboard, Users, FolderOpen, Menu, X, Zap, Sun, Moon, BarChart2, Archive, Receipt, Boxes } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/AuthContext";
@@ -9,7 +9,8 @@ const navItems = [
 { path: "/", label: "Dashboard", icon: LayoutDashboard },
 { path: "/events", label: "Events", icon: FolderOpen },
 { path: "/contacts", label: "Contacts", icon: Users },
-{ path: "/past-events", label: "Past Events", icon: Archive }];
+{ path: "/past-events", label: "Past Events", icon: Archive },
+{ path: "/inventory", label: "Inventory", icon: Boxes }];
 
 const adminNavItems = [
 { path: "/monthly-expenses", label: "Monthly Expenses", icon: BarChart2 },

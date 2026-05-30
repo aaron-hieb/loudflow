@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import AddFromInventoryPanel from "./AddFromInventoryPanel";
 
 const categoryLabels = {
   audio: "Audio", lighting: "Lighting", video: "Video", staging: "Staging",
@@ -67,7 +68,16 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="flex gap-6">
+      {/* Inventory Panel */}
+      {isAdmin && (
+        <div className="w-64 shrink-0 border border-border rounded-lg bg-card overflow-hidden flex flex-col" style={{ maxHeight: 600 }}>
+          <AddFromInventoryPanel eventId={eventId} existingItems={items} onAdded={onRefresh} />
+        </div>
+      )}
+
+      {/* Main gear list */}
+      <div className="flex-1 space-y-6">
 <div className="flex justify-between items-center">
         <h3 className="font-semibold">Gear &amp; Equipment</h3>
         {isAdmin && (
@@ -142,6 +152,8 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
           ))}
         </div>
       )}
+
+      </div>{/* end main gear list */}
 
       <Dialog open={showForm} onOpenChange={(o) => { if (!o) setShowForm(false); }}>
         <DialogContent>
