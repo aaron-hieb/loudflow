@@ -54,11 +54,14 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
     onRefresh();
   }
 
-  const [collapsed, setCollapsed] = useState({});
-  const [inventoryOpen, setInventoryOpen] = useState(true);
+  const [collapsed, setCollapsed] = useState(() => {
+    // all categories collapsed by default — will be populated as items load
+    return Object.fromEntries(Object.keys(categoryLabels).map((k) => [k, true]));
+  });
+  const [inventoryOpen, setInventoryOpen] = useState(false);
 
   function toggleCategory(cat) {
-    setCollapsed((prev) => ({ ...prev, [cat]: !prev[cat] }));
+    setCollapsed((prev) => ({ ...prev, [cat]: prev[cat] === false ? true : false }));
   }
 
   const grouped = {};
