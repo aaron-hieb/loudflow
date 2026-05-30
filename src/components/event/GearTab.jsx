@@ -237,7 +237,25 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
               </div>
               <div>
                 <Label>Quantity</Label>
-                <Input type="number" min={1} value={form.quantity} onChange={(e) => setForm({ ...form, quantity: e.target.value })} />
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, quantity: Math.max(1, Number(form.quantity) - 1) })}
+                    className="h-9 w-9 flex items-center justify-center rounded-md border border-input bg-transparent hover:bg-accent transition-colors text-lg font-medium shrink-0"
+                  >−</button>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={form.quantity}
+                    onChange={(e) => setForm({ ...form, quantity: e.target.value === "" ? "" : Math.max(1, Number(e.target.value)) })}
+                    className="text-center"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, quantity: Number(form.quantity) + 1 })}
+                    className="h-9 w-9 flex items-center justify-center rounded-md border border-input bg-transparent hover:bg-accent transition-colors text-lg font-medium shrink-0"
+                  >+</button>
+                </div>
               </div>
               <div>
                 <Label>Status</Label>
