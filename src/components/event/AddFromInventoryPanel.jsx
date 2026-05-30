@@ -12,12 +12,30 @@ const categoryLabels = {
 
 export default function AddFromInventoryPanel({ eventId, existingItems, onAdded }) {
   const [inventory, setInventory] = useState([]);
+  const [allGear, setAllGear] = useState([]);
   const [search, setSearch] = useState("");
   const [adding, setAdding] = useState(null);
+  // qty picker: { [inventoryItemId]: number }
+  const [qtys, setQtys] = useState({});
 
   useEffect(() => {
-    base44.entities.InventoryItem.list().then(setInventory);
-  }, []);
+    Promise.all([
+      base44.entities.InventoryItem.list(),
+      base44.entities.GearItem.list(),
+    ]).then(([inv, gear]) => {
+      setInventory(inv);
+      setAllGear(gear);
+    });
+  }, [existingItems]);
+
+  // Units out on events = GearItems where status != "unpacked" (returned), grouped by name (case-insensitive)
+  const unitsOut = {};
+  allGear.forEach((g) => {
+    if (g.status !== "unpacked") {
+      const key = g.name.toLowerCase();
+      unitsOut[key] = (unitsOut[key] || 0) + (g.quantity || 0);
+    }
+  });
 
   const existingNames = new Set(existingItems.map((i) => i.name.toLowerCase()));
 
@@ -26,13 +44,24 @@ export default function AddFromInventoryPanel({ eventId, existingItems, onAdded 
     (categoryLabels[item.category] || item.category).toLowerCase().includes(search.toLowerCase())
   );
 
+  function getAvailable(item) {
+    const out = unitsOut[item.name.toLowerCase()] || 0;
+    return Math.max(0, (item.quantity || 0) - out);
+  }
+
+  function getQty(item) {
+    return qtys[item.id] !== undefined ? qtys[item.id] : Math.min(1, getAvailable(item));
+  }
+
   async function handleAdd(item) {
+    const qty = getQty(item);
+    if (qty < 1) return;
     setAdding(item.id);
     await base44.entities.GearItem.create({
       event_id: eventId,
       name: item.name,
       category: item.category,
-      quantity: item.quantity,
+      quantity: qty,
       status: "in_shop",
       notes: item.notes || "",
     });
@@ -63,24 +92,53 @@ export default function AddFromInventoryPanel({ eventId, existingItems, onAdded 
         ) : (
           filtered.map((item) => {
             const alreadyAdded = existingNames.has(item.name.toLowerCase());
+            const available = getAvailable(item);
+            const qty = getQty(item);
+            const outOfStock = available === 0;
+
             return (
               <div
                 key={item.id}
-                className="flex items-center justify-between gap-2 rounded-md px-2 py-2 hover:bg-muted/50 transition-colors"
+                className="rounded-md px-2 py-2 hover:bg-muted/50 transition-colors"
               >
-                <div className="min-w-0">
-                  <p className="text-sm font-medium truncate">{item.name}</p>
-                  <p className="text-xs text-muted-foreground">{categoryLabels[item.category] || item.category} · Qty {item.quantity}</p>
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{item.name}</p>
+                    <p className={`text-xs ${outOfStock ? "text-destructive" : "text-muted-foreground"}`}>
+                      {categoryLabels[item.category] || item.category} · {available} in shop
+                    </p>
+                  </div>
                 </div>
-                <Button
-                  size="sm"
-                  variant={alreadyAdded ? "ghost" : "outline"}
-                  className="h-7 text-xs shrink-0"
-                  disabled={alreadyAdded || adding === item.id}
-                  onClick={() => handleAdd(item)}
-                >
-                  {alreadyAdded ? "Added" : adding === item.id ? "..." : <><Plus className="h-3 w-3 mr-1" />Add</>}
-                </Button>
+                {!alreadyAdded && !outOfStock && (
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <div className="flex items-center border border-border rounded-md overflow-hidden">
+                      <button
+                        className="px-1.5 py-0.5 text-muted-foreground hover:bg-muted transition-colors text-sm leading-none"
+                        onClick={() => setQtys((q) => ({ ...q, [item.id]: Math.max(1, qty - 1) }))}
+                      >−</button>
+                      <span className="px-2 text-xs font-mono min-w-[2rem] text-center">{qty}</span>
+                      <button
+                        className="px-1.5 py-0.5 text-muted-foreground hover:bg-muted transition-colors text-sm leading-none"
+                        onClick={() => setQtys((q) => ({ ...q, [item.id]: Math.min(available, qty + 1) }))}
+                      >+</button>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs flex-1"
+                      disabled={adding === item.id}
+                      onClick={() => handleAdd(item)}
+                    >
+                      {adding === item.id ? "..." : <><Plus className="h-3 w-3 mr-1" />Add</>}
+                    </Button>
+                  </div>
+                )}
+                {alreadyAdded && (
+                  <p className="text-xs text-muted-foreground italic">Already on this event</p>
+                )}
+                {outOfStock && !alreadyAdded && (
+                  <p className="text-xs text-destructive italic">None in shop</p>
+                )}
               </div>
             );
           })
