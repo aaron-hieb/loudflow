@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 const categoryLabels = {
   audio: "Audio", lighting: "Lighting", video: "Video", sfx: "SFX", staging: "Staging",
   power: "Power", power_cabling: "Power Cabling", data_cabling: "Data Cabling",
-  rigging: "Rigging", backline: "Backline", other: "Other",
+  rigging: "Rigging", backline: "Backline", other: "Other"
 };
 
 const emptyForm = { name: "", category: "audio", quantity: 1, notes: "" };
@@ -27,10 +27,10 @@ export default function Inventory() {
   const [editId, setEditId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [collapsed, setCollapsed] = useState(() =>
-    Object.fromEntries(Object.keys(categoryLabels).map((k) => [k, true]))
+  Object.fromEntries(Object.keys(categoryLabels).map((k) => [k, true]))
   );
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {load();}, []);
 
   async function load() {
     const data = await base44.entities.InventoryItem.list();
@@ -38,7 +38,7 @@ export default function Inventory() {
     setLoading(false);
   }
 
-  function openAdd() { setForm(emptyForm); setEditId(null); setShowForm(true); }
+  function openAdd() {setForm(emptyForm);setEditId(null);setShowForm(true);}
   function openEdit(item) {
     setForm({ name: item.name || "", category: item.category || "audio", quantity: item.quantity || 1, notes: item.notes || "" });
     setEditId(item.id);
@@ -77,68 +77,68 @@ export default function Inventory() {
   if (loading) return (
     <div className="flex items-center justify-center h-64">
       <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
-    </div>
-  );
+    </div>);
+
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Inventory</h1>
-          <p className="text-sm text-muted-foreground mt-1">Master catalog of all gear your company owns</p>
+          <p className="text-sm text-muted-foreground mt-1">Master catalog of all gear Loud
+ owns</p>
         </div>
-        {isAdmin && (
-          <Button onClick={openAdd} className="gap-1.5">
+        {isAdmin && <Button onClick={openAdd} className="gap-1.5">
             <Plus className="h-4 w-4" /> Add Item
           </Button>
-        )}
+        }
       </div>
 
-      {items.length === 0 ? (
-        <div className="text-center py-20 text-muted-foreground">
+      {items.length === 0 ?
+      <div className="text-center py-20 text-muted-foreground">
           <Package className="h-10 w-10 mx-auto mb-3 opacity-40" />
           <p className="font-medium">No inventory items yet</p>
           {isAdmin && <p className="text-sm mt-1">Add gear to build your master catalog</p>}
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {Object.entries(grouped).map(([cat, catItems]) => (
-            <div key={cat}>
+        </div> :
+
+      <div className="space-y-6">
+          {Object.entries(grouped).map(([cat, catItems]) =>
+        <div key={cat}>
               <button
-                onClick={() => toggleCategory(cat)}
-                className="flex items-center gap-2 w-full text-left mb-3"
-              >
+            onClick={() => toggleCategory(cat)}
+            className="flex items-center gap-2 w-full text-left mb-3">
+            
                 {collapsed[cat] ? <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
                 <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">{categoryLabels[cat] || cat}</h4>
                 <span className="text-xs text-muted-foreground/60">({catItems.length})</span>
               </button>
-              {!collapsed[cat] && (
-                <div className="space-y-2">
-                  {catItems.map((item) => (
-                    <div key={item.id} className="border border-border rounded-lg p-4 flex items-center justify-between gap-2 group bg-card">
+              {!collapsed[cat] &&
+          <div className="space-y-2">
+                  {catItems.map((item) =>
+            <div key={item.id} className="border border-border rounded-lg p-4 flex items-center justify-between gap-2 group bg-card">
                       <div className="min-w-0">
                         <p className="font-medium text-sm">{item.name}</p>
                         {item.notes && <p className="text-xs text-muted-foreground italic mt-0.5">{item.notes}</p>}
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
                         <span className="text-sm font-mono text-muted-foreground">Qty: {item.quantity}</span>
-                        {isAdmin && (
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {isAdmin &&
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button onClick={() => openEdit(item)} className="p-1 hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
                             <button onClick={() => handleDelete(item.id)} className="p-1 hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
                           </div>
-                        )}
+                }
                       </div>
                     </div>
-                  ))}
+            )}
                 </div>
-              )}
+          }
             </div>
-          ))}
+        )}
         </div>
-      )}
+      }
 
-      <Dialog open={showForm} onOpenChange={(o) => { if (!o) setShowForm(false); }}>
+      <Dialog open={showForm} onOpenChange={(o) => {if (!o) setShowForm(false);}}>
         <DialogContent>
           <DialogHeader><DialogTitle>{editId ? "Edit Item" : "Add Inventory Item"}</DialogTitle></DialogHeader>
           <div className="space-y-3 mt-2">
@@ -174,6 +174,6 @@ export default function Inventory() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>);
+
 }
