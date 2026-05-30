@@ -26,7 +26,9 @@ export default function Inventory() {
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [collapsed, setCollapsed] = useState({});
+  const [collapsed, setCollapsed] = useState(() =>
+    Object.fromEntries(Object.keys(categoryLabels).map((k) => [k, true]))
+  );
 
   useEffect(() => { load(); }, []);
 
