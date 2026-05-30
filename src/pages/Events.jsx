@@ -65,7 +65,7 @@ export default function Events() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Upcoming/Events</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Upcoming/Curren Events</h1>
         <Button onClick={() => setShowCreate(true)} className="gap-2">
           <Plus className="h-4 w-4" />
           New Event
