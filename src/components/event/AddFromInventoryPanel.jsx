@@ -43,7 +43,6 @@ export default function AddFromInventoryPanel({ eventId, existingItems, onAdded 
   return (
     <div className="flex flex-col h-full">
       <div className="p-3 border-b border-border">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Master Inventory</p>
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input

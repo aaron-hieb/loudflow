@@ -55,6 +55,7 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
   }
 
   const [collapsed, setCollapsed] = useState({});
+  const [inventoryOpen, setInventoryOpen] = useState(true);
 
   function toggleCategory(cat) {
     setCollapsed((prev) => ({ ...prev, [cat]: !prev[cat] }));
@@ -71,8 +72,26 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
     <div className="flex gap-6">
       {/* Inventory Panel */}
       {isAdmin && (
-        <div className="w-64 shrink-0 border border-border rounded-lg bg-card overflow-hidden flex flex-col" style={{ maxHeight: 600 }}>
-          <AddFromInventoryPanel eventId={eventId} existingItems={items} onAdded={onRefresh} />
+        <div className={`shrink-0 border border-border rounded-lg bg-card overflow-hidden flex flex-col transition-all duration-200 ${inventoryOpen ? "w-64" : "w-10"}`} style={{ maxHeight: 600 }}>
+          {inventoryOpen ? (
+            <>
+              <div className="flex items-center justify-between px-3 py-2 border-b border-border">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Master Inventory</p>
+                <button onClick={() => setInventoryOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors p-0.5">
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+              <AddFromInventoryPanel eventId={eventId} existingItems={items} onAdded={onRefresh} />
+            </>
+          ) : (
+            <button
+              onClick={() => setInventoryOpen(true)}
+              className="flex flex-col items-center justify-center h-full w-full text-muted-foreground hover:text-foreground transition-colors gap-1 py-4"
+              title="Open Inventory"
+            >
+              <ChevronRight className="h-4 w-4 rotate-180" />
+            </button>
+          )}
         </div>
       )}
 
