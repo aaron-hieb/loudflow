@@ -31,8 +31,8 @@ export default function Events() {
   async function handleCreate() {
     setSaving(true);
     const payload = { ...form };
-    if (payload.budget) payload.budget = Number(payload.budget);
-    else delete payload.budget;
+    if (payload.budget) payload.budget = Number(payload.budget);else
+    delete payload.budget;
     if (!payload.end_date) delete payload.end_date;
     await base44.entities.Event.create(payload);
     setShowCreate(false);
@@ -44,7 +44,7 @@ export default function Events() {
   const today = new Date().toISOString().split("T")[0];
 
   const activeEvents = events.filter((e) => {
-    const isCompleted = e.status === "completed" || (e.end_date && e.end_date < today);
+    const isCompleted = e.status === "completed" || e.end_date && e.end_date < today;
     return !isCompleted;
   });
 
@@ -58,14 +58,14 @@ export default function Events() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
-      </div>
-    );
+      </div>);
+
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Events</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Upcoming/Events</h1>
         <Button onClick={() => setShowCreate(true)} className="gap-2">
           <Plus className="h-4 w-4" />
           New Event
@@ -91,17 +91,17 @@ export default function Events() {
         </Select>
       </div>
 
-      {filtered.length === 0 ? (
-        <div className="bg-card rounded-xl border border-border p-12 text-center">
+      {filtered.length === 0 ?
+      <div className="bg-card rounded-xl border border-border p-12 text-center">
           <p className="text-muted-foreground">No events found</p>
+        </div> :
+
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filtered.map((event) =>
+        <EventCard key={event.id} event={event} />
+        )}
         </div>
-      ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
-        </div>
-      )}
+      }
 
       {/* Create Dialog */}
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
@@ -164,6 +164,6 @@ export default function Events() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>);
+
 }

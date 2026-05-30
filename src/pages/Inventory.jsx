@@ -85,8 +85,8 @@ export default function Inventory() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Inventory</h1>
-          <p className="text-sm text-muted-foreground mt-1">Master catalog of all gear Loud
- owns</p>
+          <p className="text-sm text-muted-foreground mt-1">Master catalog of all gear Loud owns
+          </p>
         </div>
         {isAdmin && <Button onClick={openAdd} className="gap-1.5">
             <Plus className="h-4 w-4" /> Add Item
