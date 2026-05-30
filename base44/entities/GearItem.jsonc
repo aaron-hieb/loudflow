@@ -16,6 +16,7 @@
         "audio",
         "lighting",
         "video",
+        "sfx",
         "staging",
         "power",
         "power_cabling",

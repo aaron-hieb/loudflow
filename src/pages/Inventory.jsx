@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 
 const categoryLabels = {
-  audio: "Audio", lighting: "Lighting", video: "Video", staging: "Staging",
+  audio: "Audio", lighting: "Lighting", video: "Video", sfx: "SFX", staging: "Staging",
   power: "Power", power_cabling: "Power Cabling", data_cabling: "Data Cabling",
   rigging: "Rigging", backline: "Backline", other: "Other",
 };

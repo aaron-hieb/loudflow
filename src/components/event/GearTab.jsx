@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import AddFromInventoryPanel from "./AddFromInventoryPanel";
 
 const categoryLabels = {
-  audio: "Audio", lighting: "Lighting", video: "Video", staging: "Staging",
+  audio: "Audio", lighting: "Lighting", video: "Video", sfx: "SFX", staging: "Staging",
   power: "Power", power_cabling: "Power Cabling", data_cabling: "Data Cabling",
   rigging: "Rigging", backline: "Backline", other: "Other",
 };
