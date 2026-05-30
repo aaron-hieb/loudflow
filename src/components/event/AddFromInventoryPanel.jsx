@@ -149,6 +149,7 @@ export default function AddFromInventoryPanel({ eventId, existingItems, onAdded 
                           </div>
                           {expanded[item.id] && (
                             <div className="mb-2 p-2 bg-muted/40 rounded text-xs space-y-1 text-muted-foreground">
+                              <div className="flex justify-between gap-2"><span className="font-medium shrink-0">Name</span><span className="text-right">{item.name}</span></div>
                               <div className="flex justify-between"><span className="font-medium">Category</span><span>{categoryLabels[item.category] || item.category}</span></div>
                               <div className="flex justify-between"><span className="font-medium">Total owned</span><span>{item.quantity}</span></div>
                               <div className="flex justify-between"><span className="font-medium">Available</span><span>{available}</span></div>
