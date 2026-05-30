@@ -44,8 +44,11 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
     onRefresh();
   }
 
-  async function handleDelete(id) {
-    await base44.entities.GearItem.delete(id);
+  async function handleDelete() {
+    setDeleting(true);
+    await base44.entities.GearItem.delete(deleteId);
+    setDeleting(false);
+    setDeleteId(null);
     onRefresh();
   }
 
@@ -54,6 +57,8 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
     onRefresh();
   }
 
+  const [deleteId, setDeleteId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const [showReturnConfirm, setShowReturnConfirm] = useState(false);
   const [returningAll, setReturningAll] = useState(false);
 
@@ -185,7 +190,7 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
                       {isAdmin && (
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                          <button onClick={() => openEdit(item)} className="p-1 hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
-                         <button onClick={() => handleDelete(item.id)} className="p-1 hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
+                         <button onClick={() => setDeleteId(item.id)} className="p-1 hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
                        </div>
                       )}
                     </div>
@@ -198,6 +203,24 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
       )}
 
       </div>{/* end main gear list */}
+
+      {/* Delete Confirmation */}
+      <Dialog open={!!deleteId} onOpenChange={(o) => { if (!o) setDeleteId(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Delete Item?</DialogTitle>
+            <DialogDescription>
+              This will permanently remove <strong>{items.find(i => i.id === deleteId)?.name}</strong> from this event. This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 mt-2">
+            <Button variant="outline" onClick={() => setDeleteId(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Return All Confirmation */}
       <Dialog open={showReturnConfirm} onOpenChange={(o) => { if (!o) setShowReturnConfirm(false); }}>
