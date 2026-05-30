@@ -150,10 +150,14 @@ export default function AddFromInventoryPanel({ eventId, existingItems, onAdded 
                                 <input
                                   type="text"
                                   inputMode="numeric"
-                                  value={qty}
+                                  value={qtys[item.id] !== undefined ? qtys[item.id] : qty}
                                   onChange={(e) => {
-                                    const v = parseInt(e.target.value.replace(/\D/g, ""), 10);
-                                    if (!isNaN(v)) setQtys((q) => ({ ...q, [item.id]: Math.min(available, Math.max(1, v)) }));
+                                    const raw = e.target.value.replace(/\D/g, "");
+                                    setQtys((q) => ({ ...q, [item.id]: raw === "" ? "" : Math.min(available, Math.max(1, parseInt(raw, 10))) }));
+                                  }}
+                                  onBlur={() => {
+                                    const v = parseInt(qtys[item.id], 10);
+                                    setQtys((q) => ({ ...q, [item.id]: isNaN(v) || v < 1 ? 1 : Math.min(available, v) }));
                                   }}
                                   className="w-8 text-xs font-mono text-center bg-transparent border-0 outline-none py-0.5"
                                 />
