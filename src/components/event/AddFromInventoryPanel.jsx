@@ -61,7 +61,7 @@ export default function AddFromInventoryPanel({ eventId, existingItems, onAdded 
   }
 
   function getQty(item) {
-    return qtys[item.id] !== undefined ? qtys[item.id] : Math.min(1, getAvailable(item));
+    return qtys[item.id] !== undefined ? qtys[item.id] : 1;
   }
 
   async function handleAdd(item) {
@@ -156,48 +156,50 @@ export default function AddFromInventoryPanel({ eventId, existingItems, onAdded 
                               {item.notes && <div className="pt-1 border-t border-border"><span className="font-medium">Notes: </span>{item.notes}</div>}
                             </div>
                           )}
-                          {!alreadyAdded && !outOfStock && (
-                            <div className="flex items-center gap-1.5 mt-1">
-                              <div className="flex items-center border border-border rounded-md overflow-hidden">
-                                <button
-                                  className="px-1.5 py-0.5 text-muted-foreground hover:bg-muted transition-colors text-sm leading-none"
-                                  onClick={() => setQtys((q) => ({ ...q, [item.id]: Math.max(1, qty - 1) }))}
-                                >−</button>
-                                <input
-                                  type="text"
-                                  inputMode="numeric"
-                                  value={qtys[item.id] !== undefined ? qtys[item.id] : qty}
-                                  onChange={(e) => {
-                                    const raw = e.target.value.replace(/\D/g, "");
-                                    setQtys((q) => ({ ...q, [item.id]: raw === "" ? "" : Math.min(available, Math.max(1, parseInt(raw, 10))) }));
-                                  }}
-                                  onBlur={() => {
-                                    const v = parseInt(qtys[item.id], 10);
-                                    setQtys((q) => ({ ...q, [item.id]: isNaN(v) || v < 1 ? 1 : Math.min(available, v) }));
-                                  }}
-                                  className="w-8 text-xs font-mono text-center bg-transparent border-0 outline-none py-0.5"
-                                />
-                                <button
-                                  className="px-1.5 py-0.5 text-muted-foreground hover:bg-muted transition-colors text-sm leading-none"
-                                  onClick={() => setQtys((q) => ({ ...q, [item.id]: Math.min(available, qty + 1) }))}
-                                >+</button>
+                          {!alreadyAdded && (
+                            <>
+                              {outOfStock && (
+                                <p className="text-xs text-amber-600 dark:text-amber-400 italic mb-1">⚠ Not returned to shop yet</p>
+                              )}
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <div className="flex items-center border border-border rounded-md overflow-hidden">
+                                  <button
+                                    className="px-1.5 py-0.5 text-muted-foreground hover:bg-muted transition-colors text-sm leading-none"
+                                    onClick={() => setQtys((q) => ({ ...q, [item.id]: Math.max(1, qty - 1) }))}
+                                  >−</button>
+                                  <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    value={qtys[item.id] !== undefined ? qtys[item.id] : qty}
+                                    onChange={(e) => {
+                                      const raw = e.target.value.replace(/\D/g, "");
+                                      setQtys((q) => ({ ...q, [item.id]: raw === "" ? "" : Math.max(1, parseInt(raw, 10)) }));
+                                    }}
+                                    onBlur={() => {
+                                      const v = parseInt(qtys[item.id], 10);
+                                      setQtys((q) => ({ ...q, [item.id]: isNaN(v) || v < 1 ? 1 : v }));
+                                    }}
+                                    className="w-8 text-xs font-mono text-center bg-transparent border-0 outline-none py-0.5"
+                                  />
+                                  <button
+                                    className="px-1.5 py-0.5 text-muted-foreground hover:bg-muted transition-colors text-sm leading-none"
+                                    onClick={() => setQtys((q) => ({ ...q, [item.id]: (qty || 1) + 1 }))}
+                                  >+</button>
+                                </div>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 text-xs flex-1"
+                                  disabled={adding === item.id}
+                                  onClick={() => handleAdd(item)}
+                                >
+                                  {adding === item.id ? "..." : <><Plus className="h-3 w-3 mr-1" />Add</>}
+                                </Button>
                               </div>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-7 text-xs flex-1"
-                                disabled={adding === item.id}
-                                onClick={() => handleAdd(item)}
-                              >
-                                {adding === item.id ? "..." : <><Plus className="h-3 w-3 mr-1" />Add</>}
-                              </Button>
-                            </div>
+                            </>
                           )}
                           {alreadyAdded && (
                             <p className="text-xs text-muted-foreground italic">Already on this event</p>
-                          )}
-                          {outOfStock && !alreadyAdded && (
-                            <p className="text-xs text-destructive italic">None in shop</p>
                           )}
                         </div>
                       );
