@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { MapPin, Phone, Clock, Car, Wifi, Users, Pencil, CloudSun, Wind, Droplets, Eye, Thermometer, X } from "lucide-react";
+import { MapPin, Phone, Clock, Car, Wifi, Users, Pencil, CloudSun, Wind, Droplets, Eye, Thermometer, X, Library } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import moment from "moment";
 
@@ -86,6 +86,8 @@ export default function VenueTab({ eventId, isAdmin, startDate, endDate, city })
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [libraryVenues, setLibraryVenues] = useState([]);
   const [form, setForm] = useState({
     venue_name: "", address: "", city: "", state: "", zip: "", country: "",
     capacity: "", contact_name: "", contact_phone: "", contact_email: "",
@@ -115,6 +117,25 @@ export default function VenueTab({ eventId, isAdmin, startDate, endDate, city })
     setLoading(false);
   }
 
+  async function openImport() {
+    const results = await base44.entities.VenueLibrary.list("-created_date");
+    setLibraryVenues(results);
+    setImportOpen(true);
+  }
+
+  async function handleImport(libVenue) {
+    const { id, created_date, updated_date, created_by, ...fields } = libVenue;
+    const payload = { ...fields, event_id: eventId };
+    if (payload.capacity) payload.capacity = Number(payload.capacity);
+    if (venue) {
+      await base44.entities.VenueInfo.update(venue.id, payload);
+    } else {
+      await base44.entities.VenueInfo.create(payload);
+    }
+    setImportOpen(false);
+    load();
+  }
+
   async function handleSave() {
     setSaving(true);
     const payload = { ...form, event_id: eventId };
@@ -138,6 +159,7 @@ export default function VenueTab({ eventId, isAdmin, startDate, endDate, city })
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">Venue Information</h3>
           <div className="flex gap-2">
+            {isAdmin && <Button variant="outline" size="sm" onClick={openImport} className="gap-1.5"><Library className="h-3.5 w-3.5" /> Import</Button>}
             <Button variant="outline" size="sm" onClick={() => { setEditing(false); if (venue) setForm({ ...venue }); }}>Cancel</Button>
             <Button size="sm" onClick={handleSave} disabled={saving}>{saving ? "Saving..." : "Save"}</Button>
           </div>
@@ -328,13 +350,46 @@ export default function VenueTab({ eventId, isAdmin, startDate, endDate, city })
           <MapPin className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground mb-4">No venue information added yet</p>
           {isAdmin && (
-            <Button onClick={() => setEditing(true)} className="gap-2">
-              <Pencil className="h-4 w-4" /> Add Venue Info
-            </Button>
+            <div className="flex gap-2 justify-center">
+              <Button variant="outline" onClick={openImport} className="gap-2">
+                <Library className="h-4 w-4" /> Import from Library
+              </Button>
+              <Button onClick={() => setEditing(true)} className="gap-2">
+                <Pencil className="h-4 w-4" /> Add Venue Info
+              </Button>
+            </div>
           )}
         </div>
         {weatherCard}
         {dayDetailDialog}
+        <Dialog open={importOpen} onOpenChange={setImportOpen}>
+          <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Import from Venue Library</DialogTitle>
+            </DialogHeader>
+            {libraryVenues.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">No venues in your library yet. Add some from the Venues page.</p>
+            ) : (
+              <div className="space-y-2 mt-2">
+                {libraryVenues.map((v) => (
+                  <button
+                    key={v.id}
+                    onClick={() => handleImport(v)}
+                    className="w-full text-left p-4 rounded-lg border border-border hover:border-primary hover:bg-accent transition-colors"
+                  >
+                    <p className="font-medium text-sm">{v.venue_name}</p>
+                    {(v.city || v.state) && (
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {[v.address, v.city, v.state].filter(Boolean).join(", ")}
+                      </p>
+                    )}
+                    {v.capacity && <p className="text-xs text-muted-foreground">Capacity: {Number(v.capacity).toLocaleString()}</p>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }
@@ -344,9 +399,14 @@ export default function VenueTab({ eventId, isAdmin, startDate, endDate, city })
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">{venue.venue_name}</h3>
         {isAdmin && (
-          <Button variant="outline" size="sm" onClick={() => setEditing(true)} className="gap-1.5">
-            <Pencil className="h-3.5 w-3.5" /> Edit
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={openImport} className="gap-1.5">
+              <Library className="h-3.5 w-3.5" /> Import
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setEditing(true)} className="gap-1.5">
+              <Pencil className="h-3.5 w-3.5" /> Edit
+            </Button>
+          </div>
         )}
       </div>
 
@@ -437,6 +497,35 @@ export default function VenueTab({ eventId, isAdmin, startDate, endDate, city })
 
       {weatherCard}
       {dayDetailDialog}
+
+      <Dialog open={importOpen} onOpenChange={setImportOpen}>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Import from Venue Library</DialogTitle>
+          </DialogHeader>
+          {libraryVenues.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4 text-center">No venues in your library yet. Add some from the Venues page.</p>
+          ) : (
+            <div className="space-y-2 mt-2">
+              {libraryVenues.map((v) => (
+                <button
+                  key={v.id}
+                  onClick={() => handleImport(v)}
+                  className="w-full text-left p-4 rounded-lg border border-border hover:border-primary hover:bg-accent transition-colors"
+                >
+                  <p className="font-medium text-sm">{v.venue_name}</p>
+                  {(v.city || v.state) && (
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {[v.address, v.city, v.state].filter(Boolean).join(", ")}
+                    </p>
+                  )}
+                  {v.capacity && <p className="text-xs text-muted-foreground">Capacity: {Number(v.capacity).toLocaleString()}</p>}
+                </button>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

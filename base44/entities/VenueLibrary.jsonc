@@ -1,0 +1,88 @@
+{
+  "name": "VenueLibrary",
+  "type": "object",
+  "properties": {
+    "venue_name": {
+      "type": "string",
+      "title": "Venue Name"
+    },
+    "address": {
+      "type": "string",
+      "title": "Address"
+    },
+    "city": {
+      "type": "string",
+      "title": "City"
+    },
+    "state": {
+      "type": "string",
+      "title": "State/Province"
+    },
+    "zip": {
+      "type": "string",
+      "title": "Zip/Postal Code"
+    },
+    "country": {
+      "type": "string",
+      "title": "Country"
+    },
+    "capacity": {
+      "type": "number",
+      "title": "Capacity"
+    },
+    "contact_name": {
+      "type": "string",
+      "title": "Venue Contact Name"
+    },
+    "contact_phone": {
+      "type": "string",
+      "title": "Contact Phone"
+    },
+    "contact_email": {
+      "type": "string",
+      "format": "email",
+      "title": "Contact Email"
+    },
+    "load_in_time": {
+      "type": "string",
+      "title": "Load-In Time"
+    },
+    "load_out_time": {
+      "type": "string",
+      "title": "Load-Out Time"
+    },
+    "parking_info": {
+      "type": "string",
+      "title": "Parking Info"
+    },
+    "wifi_info": {
+      "type": "string",
+      "title": "WiFi Info"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "venue_name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": null,
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
