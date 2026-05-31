@@ -17,7 +17,7 @@ export default function AddFromInventoryPanel({ eventId, existingItems, onAdded 
   const [adding, setAdding] = useState(null);
   const [qtys, setQtys] = useState({});
   const [collapsed, setCollapsed] = useState(
-    Object.fromEntries(Object.keys(categoryLabels).map((k) => [k, true]))
+    Object.fromEntries([...Object.keys(categoryLabels), "sfx"].map((k) => [k, true]))
   );
   const [expanded, setExpanded] = useState({});
 
