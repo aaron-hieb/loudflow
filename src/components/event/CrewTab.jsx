@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Users, Trash2, Mail, Phone, Pencil, Download } from "lucide-react";
+import { Plus, Users, Trash2, Mail, Phone, Pencil, Download, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -67,6 +67,11 @@ export default function CrewTab({ eventId, crew, onRefresh, isAdmin }) {
   const [profiles, setProfiles] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [contactPopup, setContactPopup] = useState(null);
+  const [showNotify, setShowNotify] = useState(false);
+  const [notifySubject, setNotifySubject] = useState("");
+  const [notifyMessage, setNotifyMessage] = useState("");
+  const [sending, setSending] = useState(false);
+  const [notifyResult, setNotifyResult] = useState(null);
 
   useEffect(() => {
     if (showImport) loadProfiles();
@@ -109,6 +114,14 @@ export default function CrewTab({ eventId, crew, onRefresh, isAdmin }) {
     onRefresh();
   }
 
+  async function handleNotifyAll() {
+    setSending(true);
+    setNotifyResult(null);
+    const response = await base44.functions.invoke("notifyAllCrew", { event_id: eventId, subject: notifySubject, message: notifyMessage });
+    setNotifyResult(response.data);
+    setSending(false);
+  }
+
   async function handleDelete(id) {
     await base44.entities.CrewMember.delete(id);
     onRefresh();
@@ -141,6 +154,9 @@ export default function CrewTab({ eventId, crew, onRefresh, isAdmin }) {
         <h3 className="font-semibold">Crew List <span className="text-muted-foreground font-normal text-sm">({crew.length})</span></h3>
         {isAdmin && (
         <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={() => { setNotifySubject(""); setNotifyMessage(""); setNotifyResult(null); setShowNotify(true); }} className="gap-1.5">
+            <Send className="h-3.5 w-3.5" /> Notify All
+          </Button>
           <Button size="sm" variant="outline" onClick={() => setShowImport(true)} className="gap-1.5">
             <Download className="h-3.5 w-3.5" /> Import
           </Button>
@@ -209,6 +225,38 @@ export default function CrewTab({ eventId, crew, onRefresh, isAdmin }) {
       )}
 
       <ContactPopup person={contactPopup} onClose={() => setContactPopup(null)} />
+
+      {/* Notify All Dialog */}
+      <Dialog open={showNotify} onOpenChange={(o) => { if (!o) { setShowNotify(false); setNotifyResult(null); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Notify All Crew</DialogTitle></DialogHeader>
+          <p className="text-xs text-muted-foreground -mt-1">Send an email to all confirmed crew members who have an email address.</p>
+          {notifyResult ? (
+            <div className="text-center py-6 space-y-2">
+              <p className="text-sm font-medium text-emerald-600">✓ Emails sent to {notifyResult.sent} crew member{notifyResult.sent !== 1 ? "s" : ""}</p>
+              <Button variant="outline" size="sm" onClick={() => { setShowNotify(false); setNotifyResult(null); }}>Done</Button>
+            </div>
+          ) : (
+            <div className="space-y-3 mt-1">
+              <div>
+                <Label>Subject</Label>
+                <Input placeholder="e.g. Important update about the event" value={notifySubject} onChange={(e) => setNotifySubject(e.target.value)} />
+              </div>
+              <div>
+                <Label>Message</Label>
+                <Textarea placeholder="Write your message here..." className="min-h-[120px]" value={notifyMessage} onChange={(e) => setNotifyMessage(e.target.value)} />
+              </div>
+              <div className="flex justify-end gap-2 pt-1">
+                <Button variant="outline" onClick={() => setShowNotify(false)}>Cancel</Button>
+                <Button onClick={handleNotifyAll} disabled={!notifySubject || !notifyMessage || sending} className="gap-1.5">
+                  <Send className="h-3.5 w-3.5" />
+                  {sending ? "Sending..." : "Send to All Crew"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Import Picker Dialog */}
       <Dialog open={showImport} onOpenChange={setShowImport}>
