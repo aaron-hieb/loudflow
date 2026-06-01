@@ -16,14 +16,23 @@ Deno.serve(async (req) => {
     }
 
     const crew = await base44.asServiceRole.entities.CrewMember.filter({ event_id });
-    const recipients = crew.filter((m) => m.email && m.status !== 'cancelled');
+    const crewWithEmail = crew.filter((m) => m.email && m.status !== 'cancelled');
+
+    if (crewWithEmail.length === 0) {
+      return Response.json({ sent: 0, message: 'No eligible crew members found.' });
+    }
+
+    // Get all registered app users
+    const appUsers = await base44.asServiceRole.entities.User.list();
+    const registeredEmails = new Set(appUsers.map((u) => u.email?.toLowerCase()));
+
+    const recipients = crewWithEmail.filter((m) => registeredEmails.has(m.email.toLowerCase()));
 
     if (recipients.length === 0) {
-      return Response.json({ sent: 0, skipped: 0, message: 'No crew members with emails found.' });
+      return Response.json({ sent: 0, message: 'No crew members are registered app users.' });
     }
 
     let sent = 0;
-    let skipped = 0;
 
     for (const member of recipients) {
       await base44.asServiceRole.integrations.Core.SendEmail({
@@ -34,7 +43,7 @@ Deno.serve(async (req) => {
       sent++;
     }
 
-    return Response.json({ sent, skipped, total: recipients.length });
+    return Response.json({ sent, total: recipients.length });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
