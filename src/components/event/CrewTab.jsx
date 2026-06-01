@@ -86,6 +86,9 @@ export default function CrewTab({ eventId, crew, onRefresh, isAdmin }) {
       email: source.email || "",
       status: "confirmed",
       notes: source.notes || "",
+      emergency_contact_name: source.emergency_contact_name || "",
+      emergency_contact_phone: source.emergency_contact_phone || "",
+      emergency_contact_relationship: source.emergency_contact_relationship || "",
     });
     setEditId(null);
     setShowImport(false);
