@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Plus, Package, Search, ChevronDown, ChevronRight, Info } from "lucide-react";
+import { Plus, Package, Search, ChevronDown, ChevronRight, Info, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -13,6 +14,7 @@ const categoryLabels = {
 export default function AddFromInventoryPanel({ eventId, existingItems, onAdded }) {
   const [inventory, setInventory] = useState([]);
   const [allGear, setAllGear] = useState([]);
+  const [events, setEvents] = useState([]);
   const [search, setSearch] = useState("");
   const [adding, setAdding] = useState(null);
   const [qtys, setQtys] = useState({});
@@ -25,11 +27,32 @@ export default function AddFromInventoryPanel({ eventId, existingItems, onAdded 
     Promise.all([
       base44.entities.InventoryItem.list(),
       base44.entities.GearItem.list(),
-    ]).then(([inv, gear]) => {
+      base44.entities.Event.list(),
+    ]).then(([inv, gear, evts]) => {
       setInventory(inv);
       setAllGear(gear);
+      setEvents(evts);
     });
   }, [existingItems]);
+
+  const eventsById = {};
+  events.forEach((e) => { eventsById[e.id] = e; });
+
+  // For an inventory item, the events it's currently deployed on (status != "unpacked")
+  function getDeployments(item) {
+    const key = item.name.toLowerCase();
+    const byEvent = {};
+    allGear.forEach((g) => {
+      if (g.status !== "unpacked" && g.name.toLowerCase() === key && g.event_id) {
+        byEvent[g.event_id] = (byEvent[g.event_id] || 0) + (g.quantity || 0);
+      }
+    });
+    return Object.entries(byEvent).map(([id, qty]) => ({
+      eventId: id,
+      qty,
+      name: eventsById[id]?.name || "Unknown event",
+    }));
+  }
 
   // Units out on events = GearItems where status != "unpacked" (returned)
   const unitsOut = {};
@@ -154,6 +177,26 @@ export default function AddFromInventoryPanel({ eventId, existingItems, onAdded 
                               <div className="flex justify-between"><span className="font-medium">Total owned</span><span>{item.quantity}</span></div>
                               <div className="flex justify-between"><span className="font-medium">Available</span><span>{available}</span></div>
                               {item.notes && <div className="pt-1 border-t border-border"><span className="font-medium">Notes: </span>{item.notes}</div>}
+                              {(() => {
+                                const deployments = getDeployments(item);
+                                if (deployments.length === 0) return null;
+                                return (
+                                  <div className="pt-1 border-t border-border space-y-1">
+                                    <span className="font-medium">Currently on</span>
+                                    {deployments.map((d) => (
+                                      <Link
+                                        key={d.eventId}
+                                        to={`/events/${d.eventId}`}
+                                        className="flex items-center gap-1 text-primary hover:underline"
+                                      >
+                                        <MapPin className="h-3 w-3 shrink-0" />
+                                        <span className="truncate">{d.name}</span>
+                                        <span className="ml-auto font-mono">×{d.qty}</span>
+                                      </Link>
+                                    ))}
+                                  </div>
+                                );
+                              })()}
                             </div>
                           )}
                           {!alreadyAdded && (
