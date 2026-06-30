@@ -137,6 +137,11 @@ export default function EventDetail() {
                 </span>
               )}
             </div>
+            {event.notes && (
+              <div className="mt-3 rounded-lg border border-primary/20 bg-accent/50 px-4 py-2.5 text-sm text-accent-foreground">
+                <span className="font-medium">Notes: </span>{event.notes}
+              </div>
+            )}
           </div>
           {isAdmin && (
           <div className="flex gap-2">
