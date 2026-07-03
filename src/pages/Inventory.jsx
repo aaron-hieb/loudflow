@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 
 const categoryLabels = {
   audio: "Audio", lighting: "Lighting", video: "Video", sfx: "SFX", staging: "Staging",
@@ -29,6 +30,7 @@ export default function Inventory() {
   const [collapsed, setCollapsed] = useState(() =>
   Object.fromEntries(Object.keys(categoryLabels).map((k) => [k, true]))
   );
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   useEffect(() => {load();}, []);
 
@@ -58,8 +60,9 @@ export default function Inventory() {
     load();
   }
 
-  async function handleDelete(id) {
-    await base44.entities.InventoryItem.delete(id);
+  async function handleDelete() {
+    await base44.entities.InventoryItem.delete(deleteTarget.id);
+    setDeleteTarget(null);
     load();
   }
 
@@ -125,7 +128,7 @@ export default function Inventory() {
                         {isAdmin &&
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button onClick={() => openEdit(item)} className="p-1 hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
-                            <button onClick={() => handleDelete(item.id)} className="p-1 hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
+                            <button onClick={() => setDeleteTarget(item)} className="p-1 hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
                           </div>
                 }
                       </div>
@@ -174,6 +177,14 @@ export default function Inventory() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDeleteDialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}
+        onConfirm={handleDelete}
+        title="Delete Item?"
+        itemName={deleteTarget?.name}
+      />
     </div>);
 
 }

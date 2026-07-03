@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Receipt, Plus, Loader2, ExternalLink, Trash2, Camera, Download, CheckSquare, Square } from "lucide-react";
 import ReceiptScanner from "./ReceiptScanner";
+import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 
 const statusStyles = {
   pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
@@ -28,6 +29,7 @@ export default function ReimbursementsTab({ eventId, isAdmin }) {
   const [saving, setSaving] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [addingToExpenses, setAddingToExpenses] = useState({});
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   useEffect(() => { load(); }, [eventId]);
 
@@ -79,8 +81,9 @@ export default function ReimbursementsTab({ eventId, isAdmin }) {
     load();
   }
 
-  async function handleDelete(id) {
-    await base44.entities.Reimbursement.delete(id);
+  async function handleDelete() {
+    await base44.entities.Reimbursement.delete(deleteTarget.id);
+    setDeleteTarget(null);
     load();
   }
 
@@ -200,7 +203,7 @@ export default function ReimbursementsTab({ eventId, isAdmin }) {
                           Add to Expenses
                         </button>
                       )}
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(item.id)}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setDeleteTarget(item)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </>
@@ -215,6 +218,14 @@ export default function ReimbursementsTab({ eventId, isAdmin }) {
       {showScanner && (
         <ReceiptScanner onScanned={handleScannedPdf} onClose={() => setShowScanner(false)} />
       )}
+
+      <ConfirmDeleteDialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}
+        onConfirm={handleDelete}
+        title="Delete Reimbursement?"
+        itemName={deleteTarget?.description}
+      />
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-md">

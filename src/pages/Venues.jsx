@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MapPin, Plus, Pencil, Trash2, Phone, Users, Clock, Car, Wifi } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
+import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 
 const EMPTY_FORM = {
   venue_name: "", address: "", city: "", state: "", zip: "", country: "",
@@ -24,6 +25,7 @@ export default function Venues() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   useEffect(() => { load(); }, []);
 
@@ -61,9 +63,9 @@ export default function Venues() {
     load();
   }
 
-  async function handleDelete(v) {
-    if (!confirm(`Delete "${v.venue_name}" from the library?`)) return;
-    await base44.entities.VenueLibrary.delete(v.id);
+  async function handleDelete() {
+    await base44.entities.VenueLibrary.delete(deleteTarget.id);
+    setDeleteTarget(null);
     load();
   }
 
@@ -128,7 +130,7 @@ export default function Venues() {
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(v)}>
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => handleDelete(v)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => setDeleteTarget(v)}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
@@ -170,6 +172,15 @@ export default function Venues() {
           ))}
         </div>
       )}
+
+      <ConfirmDeleteDialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}
+        onConfirm={handleDelete}
+        title="Delete Venue?"
+        itemName={deleteTarget?.venue_name}
+        description={<>This will remove <strong>{deleteTarget?.venue_name}</strong> from your venue library. This cannot be undone.</>}
+      />
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">

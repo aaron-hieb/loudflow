@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 
 const deptLabels = {
   audio: "Audio", lighting: "Lighting", video: "Video", staging: "Staging",
@@ -72,6 +73,7 @@ export default function CrewTab({ eventId, crew, onRefresh, isAdmin }) {
   const [notifyMessage, setNotifyMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [notifyResult, setNotifyResult] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   useEffect(() => {
     if (showImport) loadProfiles();
@@ -122,8 +124,9 @@ export default function CrewTab({ eventId, crew, onRefresh, isAdmin }) {
     setSending(false);
   }
 
-  async function handleDelete(id) {
-    await base44.entities.CrewMember.delete(id);
+  async function handleDelete() {
+    await base44.entities.CrewMember.delete(deleteTarget.id);
+    setDeleteTarget(null);
     onRefresh();
   }
 
@@ -211,7 +214,7 @@ export default function CrewTab({ eventId, crew, onRefresh, isAdmin }) {
                       <button onClick={() => openEdit(m)} className="p-1.5 hover:text-primary transition-colors">
                         <Pencil className="h-4 w-4" />
                       </button>
-                      <button onClick={() => handleDelete(m.id)} className="p-1.5 hover:text-destructive transition-colors">
+                      <button onClick={() => setDeleteTarget(m)} className="p-1.5 hover:text-destructive transition-colors">
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
@@ -225,6 +228,14 @@ export default function CrewTab({ eventId, crew, onRefresh, isAdmin }) {
       )}
 
       <ContactPopup person={contactPopup} onClose={() => setContactPopup(null)} />
+
+      <ConfirmDeleteDialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}
+        onConfirm={handleDelete}
+        title="Delete Crew Member?"
+        itemName={deleteTarget?.name}
+      />
 
       {/* Notify All Dialog */}
       <Dialog open={showNotify} onOpenChange={(o) => { if (!o) { setShowNotify(false); setNotifyResult(null); } }}>

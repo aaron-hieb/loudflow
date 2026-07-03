@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import moment from "moment";
+import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 
 const emptyHotelForm = { guest_name: "", hotel_name: "", address: "", check_in: "", check_out: "", room_type: "", confirmation_number: "", nightly_rate: "", notes: "" };
 
@@ -15,6 +16,7 @@ export default function HotelTab({ eventId, hotels, onRefresh, isAdmin }) {
   const [form, setForm] = useState(emptyHotelForm);
   const [editId, setEditId] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   function openAdd() { setForm(emptyHotelForm); setEditId(null); setShowForm(true); }
   function openEdit(h) {
@@ -38,8 +40,9 @@ export default function HotelTab({ eventId, hotels, onRefresh, isAdmin }) {
     onRefresh();
   }
 
-  async function handleDelete(id) {
-    await base44.entities.Hotel.delete(id);
+  async function handleDelete() {
+    await base44.entities.Hotel.delete(deleteTarget.id);
+    setDeleteTarget(null);
     onRefresh();
   }
 
@@ -89,7 +92,7 @@ export default function HotelTab({ eventId, hotels, onRefresh, isAdmin }) {
                 {isAdmin && (
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button onClick={() => openEdit(h)} className="p-1 hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
-                  <button onClick={() => handleDelete(h.id)} className="p-1 hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
+                  <button onClick={() => setDeleteTarget(h)} className="p-1 hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
                 </div>
                 )}
               </div>
@@ -97,6 +100,14 @@ export default function HotelTab({ eventId, hotels, onRefresh, isAdmin }) {
           ))}
         </div>
       )}
+
+      <ConfirmDeleteDialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}
+        onConfirm={handleDelete}
+        title="Delete Hotel Booking?"
+        itemName={deleteTarget?.hotel_name}
+      />
 
       <Dialog open={showForm} onOpenChange={(o) => { if (!o) setShowForm(false); }}>
         <DialogContent>

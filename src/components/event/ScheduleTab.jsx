@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 import moment from "moment";
 import { cn } from "@/lib/utils";
+import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 import WindLightningWidget from "./WindLightningWidget";
 
 const typeColors = {
@@ -83,7 +84,7 @@ function DayGroup({ day, items, isAdmin, onEdit, onDelete }) {
             {isAdmin && (
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2 shrink-0">
                 <button onClick={() => onEdit(item)} className="p-1 hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
-                <button onClick={() => onDelete(item.id)} className="p-1 hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
+                <button onClick={() => onDelete(item)} className="p-1 hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
               </div>
             )}
           </div>
@@ -99,6 +100,7 @@ export default function ScheduleTab({ eventId, items, onRefresh, isAdmin, city, 
   const [editId, setEditId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [showPast, setShowPast] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   function openAdd() { setForm(emptyForm); setEditId(null); setShowForm(true); }
   function openEdit(item) {
@@ -119,8 +121,9 @@ export default function ScheduleTab({ eventId, items, onRefresh, isAdmin, city, 
     onRefresh();
   }
 
-  async function handleDelete(id) {
-    await base44.entities.ScheduleItem.delete(id);
+  async function handleDelete() {
+    await base44.entities.ScheduleItem.delete(deleteTarget.id);
+    setDeleteTarget(null);
     onRefresh();
   }
 
@@ -178,7 +181,7 @@ export default function ScheduleTab({ eventId, items, onRefresh, isAdmin, city, 
               {showPast && (
                 <div className="space-y-6 mt-4 opacity-70">
                   {pastSortedDays.map((day) => (
-                    <DayGroup key={day} day={day} items={pastGrouped[day]} isAdmin={isAdmin} onEdit={openEdit} onDelete={handleDelete} />
+                    <DayGroup key={day} day={day} items={pastGrouped[day]} isAdmin={isAdmin} onEdit={openEdit} onDelete={setDeleteTarget} />
                   ))}
                 </div>
               )}
@@ -190,10 +193,18 @@ export default function ScheduleTab({ eventId, items, onRefresh, isAdmin, city, 
             <div className="text-center py-6 text-muted-foreground text-sm">No upcoming schedule items</div>
           )}
           {sortedDays.map((day) => (
-            <DayGroup key={day} day={day} items={grouped[day]} isAdmin={isAdmin} onEdit={openEdit} onDelete={handleDelete} />
+            <DayGroup key={day} day={day} items={grouped[day]} isAdmin={isAdmin} onEdit={openEdit} onDelete={setDeleteTarget} />
           ))}
         </div>
       )}
+
+      <ConfirmDeleteDialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}
+        onConfirm={handleDelete}
+        title="Delete Item?"
+        itemName={deleteTarget?.title}
+      />
 
       <Dialog open={showForm} onOpenChange={(o) => { if (!o) setShowForm(false); }}>
         <DialogContent>

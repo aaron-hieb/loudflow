@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DollarSign, Plus, Trash2, Pencil } from "lucide-react";
+import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 
 const categories = ["travel", "accommodation", "food", "equipment", "venue", "marketing", "labor", "other"];
 
@@ -19,6 +20,7 @@ export default function ExpensesTab({ eventId, budget }) {
   const [form, setForm] = useState(defaultForm);
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   useEffect(() => { load(); }, [eventId]);
 
@@ -67,8 +69,9 @@ export default function ExpensesTab({ eventId, budget }) {
     load();
   }
 
-  async function handleDelete(id) {
-    await base44.entities.Expense.delete(id);
+  async function handleDelete() {
+    await base44.entities.Expense.delete(deleteTarget.id);
+    setDeleteTarget(null);
     load();
   }
 
@@ -146,7 +149,7 @@ export default function ExpensesTab({ eventId, budget }) {
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(item)}>
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(item.id)}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setDeleteTarget(item)}>
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
@@ -157,6 +160,14 @@ export default function ExpensesTab({ eventId, budget }) {
           ))}
         </div>
       )}
+
+      <ConfirmDeleteDialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}
+        onConfirm={handleDelete}
+        title="Delete Expense?"
+        itemName={deleteTarget?.description}
+      />
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-md">

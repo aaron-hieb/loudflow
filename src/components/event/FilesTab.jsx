@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 
 const categoryLabels = {
   contract: "Contract", rider: "Rider", stage_plot: "Stage Plot",
@@ -29,6 +30,7 @@ export default function FilesTab({ eventId, files, onRefresh, isAdmin }) {
   const [form, setForm] = useState({ name: "", category: "other", notes: "" });
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   async function handleUpload() {
     if (!file) return;
@@ -48,8 +50,9 @@ export default function FilesTab({ eventId, files, onRefresh, isAdmin }) {
     onRefresh();
   }
 
-  async function handleDelete(id) {
-    await base44.entities.EventFile.delete(id);
+  async function handleDelete() {
+    await base44.entities.EventFile.delete(deleteTarget.id);
+    setDeleteTarget(null);
     onRefresh();
   }
 
@@ -100,7 +103,7 @@ export default function FilesTab({ eventId, files, onRefresh, isAdmin }) {
                 </a>
                 {isAdmin && (
                 <button
-                  onClick={() => handleDelete(f.id)}
+                  onClick={() => setDeleteTarget(f)}
                   className="opacity-0 group-hover:opacity-100 p-1.5 hover:text-destructive transition-all"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -111,6 +114,14 @@ export default function FilesTab({ eventId, files, onRefresh, isAdmin }) {
           ))}
         </div>
       )}
+
+      <ConfirmDeleteDialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}
+        onConfirm={handleDelete}
+        title="Delete File?"
+        itemName={deleteTarget?.name}
+      />
 
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
         <DialogContent>

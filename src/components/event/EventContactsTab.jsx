@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 
 const categoryColors = {
   crew: "bg-blue-100 text-blue-700",
@@ -53,6 +54,7 @@ export default function EventContactsTab({ eventId, isAdmin }) {
   const [contactPopup, setContactPopup] = useState(null);
   const [allContacts, setAllContacts] = useState([]);
   const [links, setLinks] = useState([]); // EventContact records
+  const [unlinkTarget, setUnlinkTarget] = useState(null);
 
   useEffect(() => {
     loadContacts();
@@ -75,9 +77,10 @@ export default function EventContactsTab({ eventId, isAdmin }) {
     loadContacts();
   }
 
-  async function unlinkContact(contactId) {
-    const link = links.find((l) => l.contact_id === contactId);
+  async function unlinkContact() {
+    const link = links.find((l) => l.contact_id === unlinkTarget.id);
     if (link) await base44.entities.EventContact.delete(link.id);
+    setUnlinkTarget(null);
     loadContacts();
   }
 
@@ -126,7 +129,7 @@ export default function EventContactsTab({ eventId, isAdmin }) {
               </div>
               <div className="flex items-center gap-2">
                 {isAdmin && (
-                <button onClick={(e) => { e.stopPropagation(); unlinkContact(c.id); }} className="opacity-0 group-hover:opacity-100 p-1 hover:text-destructive transition-all">
+                <button onClick={(e) => { e.stopPropagation(); setUnlinkTarget(c); }} className="opacity-0 group-hover:opacity-100 p-1 hover:text-destructive transition-all">
                   <Trash2 className="h-4 w-4" />
                 </button>
                 )}
@@ -137,6 +140,16 @@ export default function EventContactsTab({ eventId, isAdmin }) {
       )}
 
       <ContactPopup person={contactPopup} onClose={() => setContactPopup(null)} />
+
+      <ConfirmDeleteDialog
+        open={!!unlinkTarget}
+        onOpenChange={(o) => { if (!o) setUnlinkTarget(null); }}
+        onConfirm={unlinkContact}
+        title="Unlink Contact?"
+        itemName={unlinkTarget?.name}
+        description={<>This will remove <strong>{unlinkTarget?.name}</strong> from this event. The contact itself will not be deleted.</>}
+        confirmLabel="Unlink"
+      />
 
       <Dialog open={showPicker} onOpenChange={setShowPicker}>
         <DialogContent>

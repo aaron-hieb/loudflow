@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import moment from "moment";
+import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 
 const emptyFlightForm = { passenger: "", airline: "", flight_number: "", departure_city: "", arrival_city: "", departure_date: "", arrival_date: "", confirmation_code: "", notes: "" };
 
@@ -36,6 +37,7 @@ export default function TravelTab({ eventId, flights, onRefresh, isAdmin }) {
   const [saving, setSaving] = useState(false);
   const [liveStatus, setLiveStatus] = useState({});
   const [loadingStatus, setLoadingStatus] = useState({});
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   async function fetchFlightStatus(flightId, flightNumber) {
     if (!flightNumber) return;
@@ -64,8 +66,9 @@ export default function TravelTab({ eventId, flights, onRefresh, isAdmin }) {
     onRefresh();
   }
 
-  async function handleDelete(id) {
-    await base44.entities.Flight.delete(id);
+  async function handleDelete() {
+    await base44.entities.Flight.delete(deleteTarget.id);
+    setDeleteTarget(null);
     onRefresh();
   }
 
@@ -155,7 +158,7 @@ export default function TravelTab({ eventId, flights, onRefresh, isAdmin }) {
                 {isAdmin && (
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button onClick={() => openEdit(f)} className="p-1 hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
-                  <button onClick={() => handleDelete(f.id)} className="p-1 hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
+                  <button onClick={() => setDeleteTarget(f)} className="p-1 hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
                 </div>
                 )}
                 </div>
@@ -164,6 +167,14 @@ export default function TravelTab({ eventId, flights, onRefresh, isAdmin }) {
                 ))}
                 </div>
                 )}
+
+      <ConfirmDeleteDialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}
+        onConfirm={handleDelete}
+        title="Delete Flight?"
+        itemName={deleteTarget ? `${deleteTarget.passenger} — ${deleteTarget.flight_number || "Flight"}` : null}
+      />
 
       <Dialog open={showForm} onOpenChange={(o) => { if (!o) setShowForm(false); }}>
         <DialogContent>

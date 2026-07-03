@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 
 const categoryColors = {
   crew: "bg-blue-100 text-blue-700",
@@ -29,6 +30,7 @@ export default function Contacts() {
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   useEffect(() => { loadContacts(); }, []);
 
@@ -52,8 +54,9 @@ export default function Contacts() {
     loadContacts();
   }
 
-  async function handleDelete(id) {
-    await base44.entities.Contact.delete(id);
+  async function handleDelete() {
+    await base44.entities.Contact.delete(deleteTarget.id);
+    setDeleteTarget(null);
     loadContacts();
   }
 
@@ -150,7 +153,7 @@ export default function Contacts() {
                   <button onClick={() => openEdit(c)} className="p-1.5 hover:text-primary transition-colors">
                     <Pencil className="h-3.5 w-3.5" />
                   </button>
-                  <button onClick={() => handleDelete(c.id)} className="p-1.5 hover:text-destructive transition-colors">
+                  <button onClick={() => setDeleteTarget(c)} className="p-1.5 hover:text-destructive transition-colors">
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>
@@ -167,6 +170,14 @@ export default function Contacts() {
           ))}
         </div>
       )}
+
+      <ConfirmDeleteDialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}
+        onConfirm={handleDelete}
+        title="Delete Contact?"
+        itemName={deleteTarget?.name}
+      />
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent>
