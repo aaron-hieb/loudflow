@@ -17,6 +17,7 @@ import PastEvents from './pages/PastEvents';
 import Inventory from './pages/Inventory';
 import Venues from './pages/Venues';
 import TodoList from './pages/TodoList';
+import PurchaseList from './pages/PurchaseList';
 import AdminReceipts from './pages/AdminReceipts';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -107,6 +108,7 @@ const AuthenticatedApp = () => {
           <Route path="/inventory" element={<Inventory />} />
           <Route path="/venues" element={<Venues />} />
           <Route path="/todo" element={<TodoList />} />
+          <Route path="/purchases" element={<PurchaseList />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

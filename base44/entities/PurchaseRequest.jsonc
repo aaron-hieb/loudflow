@@ -1,0 +1,95 @@
+{
+  "name": "PurchaseRequest",
+  "type": "object",
+  "properties": {
+    "item_name": {
+      "type": "string",
+      "title": "Item Name"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    },
+    "quantity": {
+      "type": "number",
+      "title": "Quantity",
+      "default": 1
+    },
+    "estimated_cost": {
+      "type": "number",
+      "title": "Estimated Cost"
+    },
+    "link": {
+      "type": "string",
+      "title": "Purchase Link"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "requested",
+        "approved",
+        "ordered",
+        "received",
+        "cancelled"
+      ],
+      "default": "requested",
+      "title": "Status"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "medium",
+      "title": "Priority"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "audio",
+        "lighting",
+        "video",
+        "tools",
+        "hardware",
+        "supplies",
+        "other"
+      ],
+      "default": "other",
+      "title": "Category"
+    },
+    "vendor": {
+      "type": "string",
+      "title": "Vendor"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    },
+    "created_by_name": {
+      "type": "string",
+      "title": "Requested By"
+    }
+  },
+  "required": [
+    "item_name"
+  ],
+  "rls": {
+    "create": null,
+    "read": null,
+    "update": null,
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
