@@ -76,6 +76,14 @@
       "type": "string",
       "title": "Purchase Link"
     },
+    "quote_url": {
+      "type": "string",
+      "title": "Quote File URL"
+    },
+    "quote_name": {
+      "type": "string",
+      "title": "Quote File Name"
+    },
     "notes": {
       "type": "string",
       "title": "Notes"

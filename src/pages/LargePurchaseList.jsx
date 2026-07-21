@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 import { useToast } from "@/components/ui/use-toast";
-import { Plus, Loader2, Trash2, Pencil, PackageOpen, ExternalLink, DollarSign } from "lucide-react";
+import { Plus, Loader2, Trash2, Pencil, PackageOpen, ExternalLink, DollarSign, Paperclip, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const statusConfig = {
@@ -35,7 +35,7 @@ const emptyForm = {
   item_name: "", description: "", category: "other", vendor: "",
   estimated_cost: "", actual_cost: "", quantity: 1,
   status: "researching", priority: "medium", purchase_date: "",
-  link: "", notes: "",
+  link: "", quote_url: "", quote_name: "", notes: "",
 };
 
 const formatMoney = (val) => {
@@ -54,6 +54,7 @@ export default function LargePurchaseList() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [filter, setFilter] = useState("all");
+  const [uploadingQuote, setUploadingQuote] = useState(false);
 
   const fetchItems = async () => {
     const data = await base44.entities.LargePurchase.list("-created_date", 200);
@@ -77,9 +78,26 @@ export default function LargePurchaseList() {
       estimated_cost: item.estimated_cost ?? "", actual_cost: item.actual_cost ?? "",
       quantity: item.quantity ?? 1, status: item.status || "researching",
       priority: item.priority || "medium", purchase_date: item.purchase_date || "",
-      link: item.link || "", notes: item.notes || "",
+      link: item.link || "", quote_url: item.quote_url || "", quote_name: item.quote_name || "",
+      notes: item.notes || "",
     });
     setDialogOpen(true);
+  };
+
+  const handleQuoteUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingQuote(true);
+    try {
+      const res = await base44.integrations.Core.UploadFile({ file });
+      setForm((prev) => ({ ...prev, quote_url: res.file_url, quote_name: file.name }));
+      toast({ title: "Quote attached" });
+    } catch {
+      toast({ title: "Failed to upload quote", variant: "destructive" });
+    } finally {
+      setUploadingQuote(false);
+      e.target.value = "";
+    }
   };
 
   const handleSave = async (e) => {
@@ -244,6 +262,11 @@ export default function LargePurchaseList() {
                       Link <ExternalLink className="h-3 w-3" />
                     </a>
                   )}
+                  {item.quote_url && (
+                    <a href={item.quote_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
+                      Quote <Paperclip className="h-3 w-3" />
+                    </a>
+                  )}
                 </div>
                 {item.notes && (
                   <p className="text-xs text-muted-foreground mt-1 italic">{item.notes}</p>
@@ -382,15 +405,57 @@ export default function LargePurchaseList() {
                 />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="link">Purchase Link</Label>
-              <Input
-                id="link"
-                type="url"
-                value={form.link}
-                onChange={(e) => setForm({ ...form, link: e.target.value })}
-                placeholder="https://..."
-              />
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="link">Purchase Link</Label>
+                <Input
+                  id="link"
+                  type="url"
+                  value={form.link}
+                  onChange={(e) => setForm({ ...form, link: e.target.value })}
+                  placeholder="https://..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Quote / Document</Label>
+                {form.quote_url ? (
+                  <div className="flex items-center gap-2 p-2 rounded-md border bg-muted/40">
+                    <Paperclip className="h-4 w-4 text-primary shrink-0" />
+                    <a href={form.quote_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline truncate flex-1">
+                      {form.quote_name || "View quote"}
+                    </a>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7 shrink-0"
+                      onClick={() => setForm({ ...form, quote_url: "", quote_name: "" })}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <label className="flex items-center gap-2 p-2 rounded-md border border-dashed cursor-pointer hover:bg-muted/40 transition-colors text-sm text-muted-foreground">
+                    {uploadingQuote ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Paperclip className="h-4 w-4" />
+                        Attach quote (PDF, image, etc.)
+                      </>
+                    )}
+                    <input
+                      type="file"
+                      className="hidden"
+                      onChange={handleQuoteUpload}
+                      disabled={uploadingQuote}
+                    />
+                  </label>
+                )}
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="notes">Notes</Label>
