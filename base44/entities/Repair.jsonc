@@ -55,9 +55,10 @@
       "type": "string",
       "title": "Assigned To"
     },
-    "serial_number": {
-      "type": "string",
-      "title": "Serial Number"
+    "quantity": {
+      "type": "number",
+      "title": "Quantity",
+      "default": 1
     },
     "notes": {
       "type": "string",

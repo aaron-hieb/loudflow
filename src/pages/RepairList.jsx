@@ -35,7 +35,7 @@ const categoryLabels = {
 const emptyForm = {
   item_name: "", description: "", category: "other",
   status: "reported", priority: "medium", assigned_to: "",
-  serial_number: "", notes: "",
+  quantity: 1, notes: "",
 };
 
 export default function RepairList() {
@@ -70,7 +70,7 @@ export default function RepairList() {
       item_name: item.item_name || "", description: item.description || "",
       category: item.category || "other", status: item.status || "reported",
       priority: item.priority || "medium", assigned_to: item.assigned_to || "",
-      serial_number: item.serial_number || "", notes: item.notes || "",
+      quantity: item.quantity ?? 1, notes: item.notes || "",
     });
     setDialogOpen(true);
   };
@@ -187,6 +187,9 @@ export default function RepairList() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <p className="font-medium">{item.item_name}</p>
+                  {item.quantity > 1 && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">×{item.quantity}</span>
+                  )}
                   <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", priorityConfig[item.priority]?.badge)}>
                     {priorityConfig[item.priority]?.label}
                   </span>
@@ -203,7 +206,6 @@ export default function RepairList() {
                   <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">{item.description}</p>
                 )}
                 <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground flex-wrap">
-                  {item.serial_number && <span>S/N: {item.serial_number}</span>}
                   {item.assigned_to && <span>Assigned: {item.assigned_to}</span>}
                   {item.created_by_name && <span>By: {item.created_by_name}</span>}
                 </div>
@@ -253,12 +255,13 @@ export default function RepairList() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="serial_number">Serial Number</Label>
+                <Label htmlFor="quantity">Quantity</Label>
                 <Input
-                  id="serial_number"
-                  value={form.serial_number}
-                  onChange={(e) => setForm({ ...form, serial_number: e.target.value })}
-                  placeholder="Optional"
+                  id="quantity"
+                  type="number"
+                  min="1"
+                  value={form.quantity}
+                  onChange={(e) => setForm({ ...form, quantity: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
