@@ -1,0 +1,91 @@
+{
+  "name": "Repair",
+  "type": "object",
+  "properties": {
+    "item_name": {
+      "type": "string",
+      "title": "Item Name"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "audio",
+        "lighting",
+        "video",
+        "sfx",
+        "staging",
+        "power",
+        "power_cabling",
+        "data_cabling",
+        "rigging",
+        "backline",
+        "tools",
+        "other"
+      ],
+      "default": "other",
+      "title": "Category"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "reported",
+        "in_progress",
+        "awaiting_parts",
+        "completed",
+        "scrapped"
+      ],
+      "default": "reported",
+      "title": "Status"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "medium",
+      "title": "Priority"
+    },
+    "assigned_to": {
+      "type": "string",
+      "title": "Assigned To"
+    },
+    "serial_number": {
+      "type": "string",
+      "title": "Serial Number"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    },
+    "created_by_name": {
+      "type": "string",
+      "title": "Reported By"
+    }
+  },
+  "required": [
+    "item_name"
+  ],
+  "rls": {
+    "create": null,
+    "read": null,
+    "update": null,
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -19,6 +19,7 @@ import Venues from './pages/Venues';
 import TodoList from './pages/TodoList';
 import PurchaseList from './pages/PurchaseList';
 import LargePurchaseList from './pages/LargePurchaseList';
+import RepairList from './pages/RepairList';
 import AdminReceipts from './pages/AdminReceipts';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -110,6 +111,7 @@ const AuthenticatedApp = () => {
           <Route path="/venues" element={<Venues />} />
           <Route path="/todo" element={<TodoList />} />
           <Route path="/purchases" element={<PurchaseList />} />
+          <Route path="/repairs" element={<RepairList />} />
           <Route path="/large-purchases" element={<LargePurchaseList />} />
         </Route>
       </Route>
