@@ -49,6 +49,7 @@ export default function RepairList() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [filter, setFilter] = useState("all");
+  const [catFilter, setCatFilter] = useState("all");
 
   const fetchItems = async () => {
     const data = await base44.entities.Repair.list("-created_date", 200);
@@ -111,7 +112,9 @@ export default function RepairList() {
     }
   };
 
-  const filtered = filter === "all" ? items : items.filter((t) => t.status === filter);
+  const filtered = items
+    .filter((t) => filter === "all" || t.status === filter)
+    .filter((t) => catFilter === "all" || t.category === catFilter);
   const sorted = [...filtered].sort((a, b) => {
     const order = { reported: 0, in_progress: 1, awaiting_parts: 2, completed: 3, scrapped: 4 };
     if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status];
@@ -144,25 +147,38 @@ export default function RepairList() {
         </Button>
       </div>
 
-      <div className="flex gap-2 flex-wrap">
-        {[
-          { key: "all", label: "All" },
-          { key: "reported", label: "Reported" },
-          { key: "in_progress", label: "In Progress" },
-          { key: "awaiting_parts", label: "Awaiting Parts" },
-          { key: "completed", label: "Completed" },
-        ].map((f) => (
-          <button
-            key={f.key}
-            onClick={() => setFilter(f.key)}
-            className={cn(
-              "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
-              filter === f.key ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/70"
-            )}
-          >
-            {f.label} <span className="opacity-70">({counts[f.key]})</span>
-          </button>
-        ))}
+      <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+        <div className="flex gap-2 flex-wrap">
+          {[
+            { key: "all", label: "All" },
+            { key: "reported", label: "Reported" },
+            { key: "in_progress", label: "In Progress" },
+            { key: "awaiting_parts", label: "Awaiting Parts" },
+            { key: "completed", label: "Completed" },
+          ].map((f) => (
+            <button
+              key={f.key}
+              onClick={() => setFilter(f.key)}
+              className={cn(
+                "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                filter === f.key ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/70"
+              )}
+            >
+              {f.label} <span className="opacity-70">({counts[f.key]})</span>
+            </button>
+          ))}
+        </div>
+        <Select value={catFilter} onValueChange={setCatFilter}>
+          <SelectTrigger className="w-full sm:w-48">
+            <SelectValue placeholder="All Categories" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {Object.entries(categoryLabels).map(([k, v]) => (
+              <SelectItem key={k} value={k}>{v}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {loading ? (
