@@ -1,0 +1,113 @@
+{
+  "name": "LargePurchase",
+  "type": "object",
+  "properties": {
+    "item_name": {
+      "type": "string",
+      "title": "Item Name"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "audio",
+        "lighting",
+        "video",
+        "sfx",
+        "staging",
+        "power",
+        "rigging",
+        "backline",
+        "vehicle",
+        "tools",
+        "other"
+      ],
+      "default": "other",
+      "title": "Category"
+    },
+    "vendor": {
+      "type": "string",
+      "title": "Vendor"
+    },
+    "estimated_cost": {
+      "type": "number",
+      "title": "Estimated Cost"
+    },
+    "actual_cost": {
+      "type": "number",
+      "title": "Actual Cost"
+    },
+    "quantity": {
+      "type": "number",
+      "title": "Quantity",
+      "default": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "researching",
+        "approved",
+        "ordered",
+        "received",
+        "cancelled"
+      ],
+      "default": "researching",
+      "title": "Status"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "medium",
+      "title": "Priority"
+    },
+    "purchase_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Purchase Date"
+    },
+    "link": {
+      "type": "string",
+      "title": "Purchase Link"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    },
+    "created_by_name": {
+      "type": "string",
+      "title": "Created By"
+    }
+  },
+  "required": [
+    "item_name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
