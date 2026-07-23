@@ -54,6 +54,7 @@ export default function LargePurchaseList() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [filter, setFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [uploadingQuote, setUploadingQuote] = useState(false);
 
   const fetchItems = async () => {
@@ -142,7 +143,11 @@ export default function LargePurchaseList() {
     }
   };
 
-  const filtered = filter === "all" ? items : items.filter((t) => t.status === filter);
+  const filtered = items.filter((t) => {
+    const statusMatch = filter === "all" || t.status === filter;
+    const catMatch = categoryFilter === "all" || t.category === categoryFilter;
+    return statusMatch && catMatch;
+  });
   const sorted = [...filtered].sort((a, b) => {
     const order = { researching: 0, approved: 1, ordered: 2, received: 3, cancelled: 4 };
     if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status];
@@ -207,6 +212,31 @@ export default function LargePurchaseList() {
             )}
           >
             {f.label} <span className="opacity-70">({counts[f.key]})</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="flex gap-2 flex-wrap">
+        <span className="text-xs font-medium text-muted-foreground self-center mr-1">Category:</span>
+        <button
+          onClick={() => setCategoryFilter("all")}
+          className={cn(
+            "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+            categoryFilter === "all" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/70"
+          )}
+        >
+          All
+        </button>
+        {Object.entries(categoryLabels).map(([k, label]) => (
+          <button
+            key={k}
+            onClick={() => setCategoryFilter(k)}
+            className={cn(
+              "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+              categoryFilter === k ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/70"
+            )}
+          >
+            {label}
           </button>
         ))}
       </div>
