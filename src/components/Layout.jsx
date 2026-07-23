@@ -7,7 +7,7 @@ import AdminUserApprovalPanel from "@/components/AdminUserApprovalPanel";
 
 const navItems = [
 { path: "/", label: "Dashboard", icon: LayoutDashboard },
-{ path: "/events", label: "Events", icon: FolderOpen },
+{ path: "/events", label: "Upcoming Events", icon: FolderOpen },
 { path: "/past-events", label: "Past Events", icon: Archive, indent: true },
 { path: "/contacts", label: "Contacts", icon: Users },
 { path: "/venues", label: "Venues", icon: Building2 }];
