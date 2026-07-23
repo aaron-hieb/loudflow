@@ -8,12 +8,14 @@ import AdminUserApprovalPanel from "@/components/AdminUserApprovalPanel";
 const navItems = [
 { path: "/", label: "Dashboard", icon: LayoutDashboard },
 { path: "/events", label: "Events", icon: FolderOpen },
+{ path: "/past-events", label: "Past Events", icon: Archive, indent: true },
 { path: "/contacts", label: "Contacts", icon: Users },
-{ path: "/past-events", label: "Past Events", icon: Archive },
-{ path: "/inventory", label: "Inventory", icon: Boxes },
-{ path: "/venues", label: "Venues", icon: Building2 },
+{ path: "/venues", label: "Venues", icon: Building2 }];
+
+const shopNavItems = [
 { path: "/todo", label: "To-Do", icon: ListTodo },
 { path: "/purchases", label: "Day-to-Day Purchases", icon: ShoppingCart },
+{ path: "/inventory", label: "Inventory", icon: Boxes },
 { path: "/repairs", label: "Repairs", icon: Wrench }];
 
 const adminNavItems = [
@@ -59,6 +61,7 @@ export default function Layout() {
                 to={item.path}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+                  item.indent && "ml-4",
                   isActive ?
                   "bg-primary text-primary-foreground shadow-sm" :
                   "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -67,6 +70,26 @@ export default function Layout() {
                 {item.label}
               </Link>);
           })}
+          <>
+              <p className="text-xs text-muted-foreground font-medium px-3 pt-4 pb-1 uppercase tracking-wider">Shop</p>
+              {shopNavItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+                    isActive ?
+                    "bg-primary text-primary-foreground shadow-sm" :
+                    "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}>
+                  <Icon className="h-4 w-4" />
+                  {item.label}
+                </Link>);
+            })}
+          </>
           {user?.role === "admin" &&
           <>
               <p className="text-xs text-muted-foreground font-medium px-3 pt-4 pb-1 uppercase tracking-wider">Admin</p>
@@ -145,6 +168,7 @@ export default function Layout() {
                 onClick={() => setMobileOpen(false)}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
+                  item.indent && "ml-4",
                   isActive ?
                   "bg-primary text-primary-foreground" :
                   "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -153,6 +177,27 @@ export default function Layout() {
                 {item.label}
               </Link>);
           })}
+          <>
+            <p className="text-xs text-muted-foreground font-medium px-3 pt-4 pb-1 uppercase tracking-wider">Shop</p>
+            {shopNavItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={() => setMobileOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
+                  isActive ?
+                  "bg-primary text-primary-foreground" :
+                  "text-muted-foreground hover:text-foreground hover:bg-muted"
+                )}>
+                <Icon className="h-4 w-4" />
+                {item.label}
+              </Link>);
+          })}
+          </>
           {user?.role === "admin" && adminNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
