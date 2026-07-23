@@ -287,7 +287,7 @@ export default function LargePurchaseList() {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editing ? "Edit Large Purchase" : "Add Large Purchase"}</DialogTitle>
           </DialogHeader>
