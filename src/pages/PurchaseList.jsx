@@ -136,7 +136,7 @@ export default function PurchaseList() {
     received: items.filter((t) => t.status === "received").length,
   };
 
-  const totalEst = items
+  const totalEst = filtered
     .filter((t) => t.status !== "received" && t.status !== "cancelled")
     .reduce((sum, t) => sum + (Number(t.estimated_cost) || 0) * (Number(t.quantity) || 1), 0);
 
