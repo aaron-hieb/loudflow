@@ -174,6 +174,14 @@ export default function LargePurchaseList() {
     .filter((t) => t.actual_cost != null)
     .reduce((sum, t) => sum + (Number(t.actual_cost) || 0) * (Number(t.quantity) || 1), 0);
 
+  const filtersActive = filter !== "all" || categoryFilter !== "all" || vendorFilter !== "all";
+  const filteredEst = filtered
+    .filter((t) => t.status !== "received" && t.status !== "cancelled")
+    .reduce((sum, t) => sum + (Number(t.estimated_cost) || 0) * (Number(t.quantity) || 1), 0);
+  const filteredActual = filtered
+    .filter((t) => t.actual_cost != null)
+    .reduce((sum, t) => sum + (Number(t.actual_cost) || 0) * (Number(t.quantity) || 1), 0);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -196,6 +204,11 @@ export default function LargePurchaseList() {
           <DollarSign className="h-4 w-4" />
           {totalEst > 0 && <span className="font-medium">Estimated (open): {formatMoney(totalEst)}</span>}
           {totalActual > 0 && <span className="font-medium">Actual spent: {formatMoney(totalActual)}</span>}
+          {filtersActive && (
+            <span className="font-medium text-amber-900 border-l border-amber-300 pl-4 ml-1">
+              Filtered: {formatMoney(filteredEst)} est{filteredActual > 0 ? ` · ${formatMoney(filteredActual)} actual` : ""}
+            </span>
+          )}
         </div>
       )}
 
