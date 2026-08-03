@@ -55,6 +55,7 @@ export default function LargePurchaseList() {
   const [deleting, setDeleting] = useState(false);
   const [filter, setFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [vendorFilter, setVendorFilter] = useState("all");
   const [uploadingQuote, setUploadingQuote] = useState(false);
 
   const fetchItems = async () => {
@@ -146,8 +147,11 @@ export default function LargePurchaseList() {
   const filtered = items.filter((t) => {
     const statusMatch = filter === "all" || t.status === filter;
     const catMatch = categoryFilter === "all" || t.category === categoryFilter;
-    return statusMatch && catMatch;
+    const vendorMatch = vendorFilter === "all" || t.vendor === vendorFilter;
+    return statusMatch && catMatch && vendorMatch;
   });
+
+  const vendors = [...new Set(items.map((t) => t.vendor).filter(Boolean))].sort();
   const sorted = [...filtered].sort((a, b) => {
     const order = { researching: 0, approved: 1, ordered: 2, received: 3, cancelled: 4 };
     if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status];
@@ -239,6 +243,19 @@ export default function LargePurchaseList() {
             {label}
           </button>
         ))}
+      </div>
+
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="text-xs font-medium text-muted-foreground">Vendor:</span>
+        <Select value={vendorFilter} onValueChange={setVendorFilter}>
+          <SelectTrigger className="w-48 h-8 text-sm"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All vendors</SelectItem>
+            {vendors.map((v) => (
+              <SelectItem key={v} value={v}>{v}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {loading ? (
