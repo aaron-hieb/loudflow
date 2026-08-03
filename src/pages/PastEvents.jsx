@@ -1,13 +1,18 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Search, Archive } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 import EventCard from "../components/EventCard";
 
 export default function PastEvents() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [copying, setCopying] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -25,6 +30,27 @@ export default function PastEvents() {
     e.name?.toLowerCase().includes(search.toLowerCase()) ||
     e.client?.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleCopy = async (event) => {
+    setCopying(true);
+    try {
+      const { id, created_date, updated_date, created_by_id, start_date, end_date, status, ...rest } = event;
+      const today = new Date().toISOString().split("T")[0];
+      const copy = await base44.entities.Event.create({
+        ...rest,
+        name: `Copy of ${event.name}`,
+        status: "planning",
+        start_date: today,
+        end_date: "",
+      });
+      toast({ title: "Event copied", description: "Update the dates and details for your new event." });
+      navigate(`/events/${copy.id}`);
+    } catch {
+      toast({ title: "Failed to copy event", variant: "destructive" });
+    } finally {
+      setCopying(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -54,7 +80,7 @@ export default function PastEvents() {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((event) => (
-            <EventCard key={event.id} event={event} />
+            <EventCard key={event.id} event={event} onCopy={copying ? undefined : handleCopy} />
           ))}
         </div>
       )}
