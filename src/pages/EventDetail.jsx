@@ -143,11 +143,11 @@ export default function EventDetail() {
               </div>
             )}
           </div>
-          {isAdmin && (
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => setShowEdit(true)} className="gap-1.5">
               <Pencil className="h-3.5 w-3.5" /> Edit
             </Button>
+            {isAdmin && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-1.5 text-destructive hover:text-destructive">
@@ -165,8 +165,8 @@ export default function EventDetail() {
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
+            )}
           </div>
-          )}
         </div>
       </div>
 

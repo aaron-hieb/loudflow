@@ -122,18 +122,16 @@ export default function GearTab({ eventId, items, onRefresh, isAdmin }) {
       <div className="flex-1 space-y-6">
 <div className="flex justify-between items-center">
         <h3 className="font-semibold">Gear &amp; Equipment</h3>
-        {isAdmin && (
-          <div className="flex items-center gap-2">
-            {items.length > 0 && (
-              <Button size="sm" variant="outline" onClick={() => setShowReturnConfirm(true)} className="gap-1.5 text-muted-foreground">
-                <RotateCcw className="h-3.5 w-3.5" /> Return All
-              </Button>
-            )}
-            <Button size="sm" onClick={openAdd} className="gap-1.5">
-              <Plus className="h-3.5 w-3.5" /> Add Gear
+        <div className="flex items-center gap-2">
+          {isAdmin && items.length > 0 && (
+            <Button size="sm" variant="outline" onClick={() => setShowReturnConfirm(true)} className="gap-1.5 text-muted-foreground">
+              <RotateCcw className="h-3.5 w-3.5" /> Return All
             </Button>
-          </div>
-        )}
+          )}
+          <Button size="sm" onClick={openAdd} className="gap-1.5">
+            <Plus className="h-3.5 w-3.5" /> Add Gear
+          </Button>
+        </div>
       </div>
 
       {items.length === 0 ? (
