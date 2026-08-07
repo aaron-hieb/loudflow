@@ -43,9 +43,37 @@ export default function PastEvents() {
         start_date: today,
         end_date: "",
       });
-      toast({ title: "Event copied", description: "Update the dates and details for your new event." });
+
+      // Duplicate all template-worthy child content onto the new event
+      const stripBuiltins = (o) => {
+        const { id, created_date, updated_date, created_by_id, ...data } = o;
+        return data;
+      };
+      const [schedule, flights, hotels, gear, files, crew, venueInfo, eventContacts] = await Promise.all([
+        base44.entities.ScheduleItem.filter({ event_id: id }),
+        base44.entities.Flight.filter({ event_id: id }),
+        base44.entities.Hotel.filter({ event_id: id }),
+        base44.entities.GearItem.filter({ event_id: id }),
+        base44.entities.EventFile.filter({ event_id: id }),
+        base44.entities.CrewMember.filter({ event_id: id }),
+        base44.entities.VenueInfo.filter({ event_id: id }),
+        base44.entities.EventContact.filter({ event_id: id }),
+      ]);
+
+      const tasks = [];
+      if (schedule.length) tasks.push(base44.entities.ScheduleItem.bulkCreate(schedule.map((i) => ({ ...stripBuiltins(i), event_id: copy.id, date: "" }))));
+      if (flights.length) tasks.push(base44.entities.Flight.bulkCreate(flights.map((i) => ({ ...stripBuiltins(i), event_id: copy.id, departure_date: "", arrival_date: i.arrival_date || "" }))));
+      if (hotels.length) tasks.push(base44.entities.Hotel.bulkCreate(hotels.map((i) => ({ ...stripBuiltins(i), event_id: copy.id, check_in: "", check_out: "" }))));
+      if (gear.length) tasks.push(base44.entities.GearItem.bulkCreate(gear.map((i) => ({ ...stripBuiltins(i), event_id: copy.id, status: "in_shop" }))));
+      if (files.length) tasks.push(base44.entities.EventFile.bulkCreate(files.map((i) => stripBuiltins(i)).map((i) => ({ ...i, event_id: copy.id }))));
+      if (crew.length) tasks.push(base44.entities.CrewMember.bulkCreate(crew.map((i) => ({ ...stripBuiltins(i), event_id: copy.id, status: "pending" }))));
+      if (venueInfo.length) tasks.push(base44.entities.VenueInfo.bulkCreate(venueInfo.map((i) => ({ ...stripBuiltins(i), event_id: copy.id }))));
+      if (eventContacts.length) tasks.push(base44.entities.EventContact.bulkCreate(eventContacts.map((i) => ({ ...stripBuiltins(i), event_id: copy.id }))));
+      await Promise.all(tasks);
+
+      toast({ title: "Event copied", description: "Gear, schedule, crew, and other details were copied over — update the dates and details." });
       navigate(`/events/${copy.id}`);
-    } catch {
+    } catch (e) {
       toast({ title: "Failed to copy event", variant: "destructive" });
     } finally {
       setCopying(false);
