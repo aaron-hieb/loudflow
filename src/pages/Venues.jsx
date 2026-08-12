@@ -5,9 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MapPin, Plus, Pencil, Trash2, Phone, Users, Clock, Car, Wifi } from "lucide-react";
+import { MapPin, Plus, Pencil, Trash2, Phone, Users, Clock, Car, Wifi, Download } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
+import RoostedImportDialog from "@/components/RoostedImportDialog";
 
 const EMPTY_FORM = {
   venue_name: "", address: "", city: "", state: "", zip: "", country: "",
@@ -26,6 +27,7 @@ export default function Venues() {
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [showRoosted, setShowRoosted] = useState(false);
 
   useEffect(() => { load(); }, []);
 
@@ -82,9 +84,14 @@ export default function Venues() {
           <p className="text-muted-foreground text-sm mt-1">Save venues to quickly import into events</p>
         </div>
         {isAdmin && (
-          <Button onClick={openNew} className="gap-2">
-            <Plus className="h-4 w-4" /> Add Venue
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowRoosted(true)} className="gap-2">
+              <Download className="h-4 w-4" /> Import from Roosted
+            </Button>
+            <Button onClick={openNew} className="gap-2">
+              <Plus className="h-4 w-4" /> Add Venue
+            </Button>
+          </div>
         )}
       </div>
 
@@ -181,6 +188,8 @@ export default function Venues() {
         itemName={deleteTarget?.venue_name}
         description={<>This will remove <strong>{deleteTarget?.venue_name}</strong> from your venue library. This cannot be undone.</>}
       />
+
+      <RoostedImportDialog open={showRoosted} onOpenChange={setShowRoosted} mode="venues" onImported={load} />
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">

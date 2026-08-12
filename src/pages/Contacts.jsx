@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Search, Mail, Phone, Trash2, Pencil } from "lucide-react";
+import { Plus, Search, Mail, Phone, Trash2, Pencil, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
+import RoostedImportDialog from "@/components/RoostedImportDialog";
 
 const categoryColors = {
   crew: "bg-blue-100 text-blue-700",
@@ -31,6 +32,7 @@ export default function Contacts() {
   const [editId, setEditId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [showRoosted, setShowRoosted] = useState(false);
 
   useEffect(() => { loadContacts(); }, []);
 
@@ -91,9 +93,14 @@ export default function Contacts() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Contacts</h1>
-        <Button onClick={() => { setForm(emptyForm); setEditId(null); setShowForm(true); }} className="gap-2">
-          <Plus className="h-4 w-4" /> Add Contact
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowRoosted(true)} className="gap-2">
+            <Download className="h-4 w-4" /> Import from Roosted
+          </Button>
+          <Button onClick={() => { setForm(emptyForm); setEditId(null); setShowForm(true); }} className="gap-2">
+            <Plus className="h-4 w-4" /> Add Contact
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
@@ -178,6 +185,8 @@ export default function Contacts() {
         title="Delete Contact?"
         itemName={deleteTarget?.name}
       />
+
+      <RoostedImportDialog open={showRoosted} onOpenChange={setShowRoosted} mode="contacts" onImported={loadContacts} />
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent>
