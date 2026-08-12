@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Download } from "lucide-react";
+import RoostedImportDialog from "../components/RoostedImportDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -17,6 +18,7 @@ export default function Events() {
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ name: "", client: "", venue: "", city: "", start_date: "", end_date: "", status: "planning", budget: "", notes: "" });
   const [saving, setSaving] = useState(false);
+  const [showRoosted, setShowRoosted] = useState(false);
 
   useEffect(() => {
     loadEvents();
@@ -66,10 +68,16 @@ export default function Events() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Upcoming/Current Events</h1>
-        <Button onClick={() => setShowCreate(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          New Event
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowRoosted(true)} className="gap-2">
+            <Download className="h-4 w-4" />
+            Import from Roosted
+          </Button>
+          <Button onClick={() => setShowCreate(true)} className="gap-2">
+            <Plus className="h-4 w-4" />
+            New Event
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
@@ -164,6 +172,8 @@ export default function Events() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <RoostedImportDialog open={showRoosted} onOpenChange={setShowRoosted} />
     </div>);
 
 }
