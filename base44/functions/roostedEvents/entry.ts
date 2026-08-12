@@ -43,6 +43,7 @@ export default async function(req) {
           venue: e.location ? e.location.location : "",
           city: e.location ? e.location.addy_city : "",
         }));
+        items.sort((a, b) => (a.date || "9999").localeCompare(b.date || "9999"));
         total = data.total_count || items.length;
       } else if (resource === "locations") {
         const data = await roostedGet(base, headers, `/locations?page=1&items_per_page=100`);
